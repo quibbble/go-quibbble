@@ -1,6 +1,8 @@
 package timer
 
-import "time"
+import (
+	"time"
+)
 
 // Timer counts down and performs an action on alarm
 type Timer struct {
@@ -14,6 +16,7 @@ func NewTimer(duration time.Duration, alarm chan bool) *Timer {
 	return &Timer{
 		duration: duration,
 		timer:    nil,
+		endTime:  time.Now(),
 		alarm:    alarm,
 	}
 }

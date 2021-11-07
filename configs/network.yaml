@@ -1,0 +1,41 @@
+# Used to specific environment specific behavior
+# local - pretty text logging
+# stage - none
+# prod - none
+Environment: "local"
+Log:
+  Level: "debug"
+
+Router:
+  TimeoutSec: 10
+  RequestPerSecLimit: 10000
+  DisableCors: false
+  AllowedOrigins:
+    - "https://www.quibbble.com"
+    - "http://127.0.0.1:3000"
+  AllowedMethods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  AllowedHeaders:
+    - "Origin"
+    - "X-Requested-With"
+    - "Content-Type"
+    - "Accept"
+    - "X-Auth-Token"
+    - "Access-Control-Allow-Headers"
+    - "Authorization"
+
+Server:
+  Port: "8080"
+
+Network:
+  Games:
+    - "Carcassonne"
+    - "Connect4"
+    - "Codenames"
+    - "Tsuro"
+  Adapters:
+  GameExpiry: "3h"

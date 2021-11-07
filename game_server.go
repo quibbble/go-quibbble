@@ -29,8 +29,8 @@ type gameServer struct {
 func newServer(game bg.BoardGameWithBGN, options *NetworkingCreateGameOptions, adapters []NetworkAdapter) *gameServer {
 	var clock *timer.Timer
 	alarm := make(chan bool)
-	if options.TurnLengthSeconds > 0 {
-		clock = timer.NewTimer(time.Duration(options.TurnLengthSeconds)*time.Second, alarm)
+	if options.TurnLength != nil {
+		clock = timer.NewTimer(time.Duration(*options.TurnLength), alarm)
 	}
 	// playing online against unknown people with timer enabled so start timer right away
 	if clock != nil && len(options.Players) > 0 {
@@ -86,11 +86,11 @@ func (s *gameServer) Start() {
 				s.done <- err
 				continue
 			}
-			var timeLeft time.Duration
+			var timeLeft string
 			if s.timer != nil {
-				timeLeft = s.timer.Remaining()
+				timeLeft = s.timer.Remaining().String()
 			}
-			s.sendGameMessage(player, &NetworkingGameMessage{s.options, &timeLeft}, snapshot)
+			s.sendGameMessage(player, &NetworkingGameMessage{s.options, timeLeft}, snapshot)
 			s.done <- nil
 		case player := <-s.leave:
 			delete(s.players, player)
@@ -101,41 +101,41 @@ func (s *gameServer) Start() {
 			oldSnapshot, _ := s.game.GetSnapshot()
 			var action bg.BoardGameAction
 			if err := json.Unmarshal(message.payload, &action); err != nil {
-				s.sendErrorMessage(message.player, err)
+				s.sendErrorMessage(message.player, &NetworkingGameMessage{s.options, ""}, err)
 				continue
 			}
 			if err := s.game.Do(&action); err != nil {
-				s.sendErrorMessage(message.player, err)
+				s.sendErrorMessage(message.player, &NetworkingGameMessage{s.options, ""}, err)
 				continue
 			}
 			snapshot, _ := s.game.GetSnapshot()
 			if len(snapshot.Winners) > 0 {
 				for _, adapter := range s.adapters {
 					adapter.OnGameEnd(&GameMessage{
-						Network:  &NetworkingGameMessage{s.options, nil},
+						Network:  &NetworkingGameMessage{s.options, ""},
 						Snapshot: snapshot,
 					})
 				}
 			}
-			var timeLeft time.Duration
+			var timeLeft string
 			if s.timer != nil {
 				if len(snapshot.Winners) > 0 {
 					s.timer.Stop()
 				} else if oldSnapshot.Turn != snapshot.Turn {
 					s.timer.Start()
-					timeLeft = s.timer.Remaining()
+					timeLeft = s.timer.Remaining().String()
 				}
 			}
 			for player, team := range s.players {
 				if team != "" {
 					snapshot, err := s.game.GetSnapshot(team)
 					if err != nil {
-						s.sendErrorMessage(player, err)
+						s.sendErrorMessage(player, &NetworkingGameMessage{s.options, timeLeft}, err)
 						continue
 					}
-					s.sendGameMessage(player, &NetworkingGameMessage{s.options, &timeLeft}, snapshot)
+					s.sendGameMessage(player, &NetworkingGameMessage{s.options, timeLeft}, snapshot)
 				} else {
-					s.sendGameMessage(player, &NetworkingGameMessage{s.options, &timeLeft}, snapshot)
+					s.sendGameMessage(player, &NetworkingGameMessage{s.options, timeLeft}, snapshot)
 				}
 			}
 		case _ = <-s.alarm:
@@ -151,25 +151,25 @@ func (s *gameServer) Start() {
 				_ = s.game.Do(action)
 				snapshot, _ = s.game.GetSnapshot()
 			}
-			var timeLeft time.Duration
+			var timeLeft string
 			if s.timer != nil {
 				if len(snapshot.Winners) > 0 {
 					s.timer.Stop()
 				} else {
 					s.timer.Start()
-					timeLeft = s.timer.Remaining()
+					timeLeft = s.timer.Remaining().String()
 				}
 			}
 			for player, team := range s.players {
 				if team != "" {
 					snapshot, err := s.game.GetSnapshot(team)
 					if err != nil {
-						s.sendErrorMessage(player, err)
+						s.sendErrorMessage(player, &NetworkingGameMessage{s.options, timeLeft}, err)
 						continue
 					}
-					s.sendGameMessage(player, &NetworkingGameMessage{s.options, &timeLeft}, snapshot)
+					s.sendGameMessage(player, &NetworkingGameMessage{s.options, timeLeft}, snapshot)
 				} else {
-					s.sendGameMessage(player, &NetworkingGameMessage{s.options, &timeLeft}, snapshot)
+					s.sendGameMessage(player, &NetworkingGameMessage{s.options, timeLeft}, snapshot)
 				}
 			}
 		}
@@ -202,10 +202,10 @@ func (s *gameServer) sendGameMessage(player *player, network *NetworkingGameMess
 	}
 }
 
-func (s *gameServer) sendErrorMessage(player *player, err error) {
+func (s *gameServer) sendErrorMessage(player *player, network *NetworkingGameMessage, err error) {
 	payload, _ := json.Marshal(GameErrorMessage{
-		GameID: s.options.GameID,
-		Error:  err.Error(),
+		Network: network,
+		Error:   err.Error(),
 	})
 	select {
 	case player.send <- payload:

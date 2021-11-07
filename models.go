@@ -3,6 +3,7 @@ package go_boardgame_networking
 import (
 	"github.com/gorilla/websocket"
 	bg "github.com/quibbble/go-boardgame"
+	"github.com/quibbble/go-boardgame-networking/pkg/duration"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
 	"time"
 )
@@ -45,8 +46,8 @@ type NetworkingCreateGameOptions struct {
 	Players map[string][]string `json:",omitempty"`
 
 	// TurnLengthSeconds refers to the max length of time each player may take per turn - optional
-	// Zero or empty means there is no turn length
-	TurnLengthSeconds int `json:",omitempty"`
+	// nil means no turn length
+	TurnLength *duration.Duration `json:",omitempty"`
 
 	// SingleDevice refers to the ability for multiple players to play on one device - optional
 	// No business logic is added for this field, used by the frontend only
@@ -71,12 +72,12 @@ type GameMessage struct {
 type NetworkingGameMessage struct {
 	*NetworkingCreateGameOptions
 
-	// TurnTimeLeftSeconds refers to the remaining amount of time in the turn
-	TurnTimeLeftSeconds *time.Duration `json:",omitempty"`
+	// TurnTimeLeft refers to the remaining amount of time in the turn
+	TurnTimeLeft string `json:",omitempty"`
 }
 
 // GameErrorMessage is the message sent when there was an error
 type GameErrorMessage struct {
-	GameID string
-	Error  string
+	Network *NetworkingGameMessage
+	Error   string
 }

@@ -57,9 +57,9 @@ func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {
 	if !ok {
 		return nil, fmt.Errorf("game key '%s' does not exist", gameKey)
 	}
-	game, ok := hub.games[gameID]
+	server, ok := hub.games[gameID]
 	if !ok {
-		return nil, fmt.Errorf("game id '%s' already exists", gameID)
+		return nil, fmt.Errorf("game id '%s' does not exists", gameID)
 	}
-	return game.game.GetBGN(), nil
+	return server.game.GetBGN(), nil
 }
