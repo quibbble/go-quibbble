@@ -7,6 +7,7 @@ require (
 	github.com/go-chi/cors v1.2.0
 	github.com/go-chi/httprate v0.5.2
 	github.com/gorilla/websocket v1.4.2
+	github.com/mitchellh/mapstructure v1.4.2
 	github.com/quibbble/go-boardgame v0.0.0-20211102031856-e4f84af40e4e
 	github.com/quibbble/go-carcassonne v0.0.0-20211105050017-927cc68115cf
 	github.com/quibbble/go-codenames v0.0.0-20211105050359-8ce3141c91ba
@@ -23,7 +24,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
-	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/mroth/weightedrand v0.4.1 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
