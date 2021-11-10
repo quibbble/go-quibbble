@@ -17,3 +17,11 @@ func contains(items []string, item string) bool {
 	}
 	return false
 }
+
+func copyMap(m map[string]string) map[string]string {
+	newMap := make(map[string]string)
+	for k, v := range m {
+		newMap[k] = v
+	}
+	return newMap
+}

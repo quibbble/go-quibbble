@@ -4,5 +4,5 @@ package go_boardgame_networking
 // This can be useful for updating statistics, storing completed games, etc.
 type NetworkAdapter interface {
 	OnGameStart(initialOptions *CreateGameOptions)
-	OnGameEnd(finalState *GameMessage)
+	OnGameEnd(finalState *OutboundGameMessage)
 }

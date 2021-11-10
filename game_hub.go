@@ -43,12 +43,11 @@ func (h *gameHub) Start() {
 				h.done <- fmt.Errorf("game id '%s' already exists", create.NetworkOptions.GameID)
 				continue
 			}
-			newGame, err := h.builder.CreateWithBGN(create.GameOptions)
+			server, err := newServer(h.builder, &create, h.adapters)
 			if err != nil {
 				h.done <- err
 				continue
 			}
-			server := newServer(newGame, create.NetworkOptions, h.adapters)
 			go server.Start()
 			h.games[create.NetworkOptions.GameID] = server
 			h.done <- nil
@@ -58,12 +57,11 @@ func (h *gameHub) Start() {
 				h.done <- fmt.Errorf("game id '%s' already exists", load.NetworkOptions.GameID)
 				continue
 			}
-			newGame, err := h.builder.Load(load.BGN)
+			server, err := newServerWithBGN(h.builder, &load, h.adapters)
 			if err != nil {
 				h.done <- err
 				continue
 			}
-			server := newServer(newGame, load.NetworkOptions, h.adapters)
 			go server.Start()
 			h.games[load.NetworkOptions.GameID] = server
 			h.done <- nil

@@ -101,9 +101,38 @@ func (h *Handler) JoinGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.network.JoinGame(networking.JoinGameOptions{
-		GameKey: gameKey,
-		GameID:  gameID,
-		Conn:    conn,
+		GameKey:    gameKey,
+		GameID:     gameID,
+		PlayerName: generateName(),
+		Conn:       conn,
+	}); err != nil {
+		_ = conn.Close()
+	}
+}
+
+func (h *Handler) JoinSecureGame(w http.ResponseWriter, r *http.Request) {
+	gameKey := r.URL.Query().Get("GameKey")
+	gameID := r.URL.Query().Get("GameID")
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		writeJSONResponse(h.render, w, http.StatusInternalServerError, errorResponse{Message: "failed to upgrade websocket connection"})
+		return
+	}
+	/*
+		TODO------------------------------------------------------------------------------------------------------
+		Add some form of authentication here such as jwt tokens that sets player field based on jwt subject field.
+		This then creates a secure connection between the game and players such that the players playing the game
+		are known to the game and one player cannot make plays for the other.
+		TODO------------------------------------------------------------------------------------------------------
+	*/
+	playerID := ""
+	playerName := "" // there should be some lookup to get a player name from player ID
+	if err := h.network.JoinGame(networking.JoinGameOptions{
+		GameKey:    gameKey,
+		GameID:     gameID,
+		PlayerID:   playerID,
+		PlayerName: playerName,
+		Conn:       conn,
 	}); err != nil {
 		_ = conn.Close()
 	}

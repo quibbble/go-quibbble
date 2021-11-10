@@ -20,18 +20,20 @@ type message struct {
 
 // player is the player connecting to a specific game instance
 type player struct {
-	playerID string
-	server   *gameServer
-	conn     *websocket.Conn
-	send     chan []byte
+	playerID   string
+	playerName string
+	server     *gameServer
+	conn       *websocket.Conn
+	send       chan []byte
 }
 
 func newPlayer(join JoinGameOptions, server *gameServer) *player {
 	return &player{
-		playerID: join.PlayerID,
-		server:   server,
-		conn:     join.Conn,
-		send:     make(chan []byte),
+		playerID:   join.PlayerID,
+		playerName: join.PlayerName,
+		server:     server,
+		conn:       join.Conn,
+		send:       make(chan []byte),
 	}
 }
 

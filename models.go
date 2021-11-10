@@ -56,28 +56,51 @@ type NetworkingCreateGameOptions struct {
 
 // JoinGameOptions are the fields necessary for joining a game
 type JoinGameOptions struct {
-	GameKey  string
-	GameID   string
-	PlayerID string
-	Conn     *websocket.Conn
+	GameKey    string
+	GameID     string
+	PlayerID   string
+	PlayerName string
+	Conn       *websocket.Conn
 }
 
-// GameMessage is the message sent when returning game information
-type GameMessage struct {
-	Network  *NetworkingGameMessage
-	Snapshot *bg.BoardGameSnapshot
-}
+// OutboundGameMessage is the message sent when returning game information
+type OutboundGameMessage struct {
+	Type string
 
-// NetworkingGameMessage contains the networking data sent when returning game information
-type NetworkingGameMessage struct {
 	*NetworkingCreateGameOptions
+
+	// Snapshot is the board game data
+	Snapshot *bg.BoardGameSnapshot
 
 	// TurnTimeLeft refers to the remaining amount of time in the turn
 	TurnTimeLeft string `json:",omitempty"`
 }
 
-// GameErrorMessage is the message sent when there was an error
-type GameErrorMessage struct {
-	Network *NetworkingGameMessage
-	Error   string
+// OutboundChatMessage is the list of chat logs
+type OutboundChatMessage struct {
+	Type string
+
+	// Chat is a mapping from player name to message
+	Chat []*ChatMessage
+}
+
+// OutboundConnectedMessage is the players connected to the game
+type OutboundConnectedMessage struct {
+	Type string
+
+	// Connected is the list of player names to team
+	Connected map[string]string
+}
+
+// OutboundErrorMessage is the message sent when there was an error
+type OutboundErrorMessage struct {
+	Type string
+
+	Error string
+}
+
+// ChatMessage is a message in a chat
+type ChatMessage struct {
+	Name string
+	Msg  string
 }
