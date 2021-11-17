@@ -9,7 +9,6 @@ import (
 	"github.com/quibbble/go-boardgame/pkg/bgn"
 	"log"
 	"math/rand"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -237,14 +236,11 @@ func (s *gameServer) Start() {
 				if s.create != nil {
 					game, _ = s.builder.CreateWithBGN(&bg.BoardGameOptions{
 						Teams:       s.create.Teams,
-						Seed:        time.Now().UnixNano(),
 						MoreOptions: s.create.MoreOptions,
 					})
 				} else {
-					newTags := copyMap(s.load.Tags)
-					newTags["Seed"] = strconv.Itoa(int(time.Now().UnixNano()))
 					game, _ = s.builder.Load(&bgn.Game{
-						Tags:    newTags,
+						Tags:    s.load.Tags,
 						Actions: make([]bgn.Action, 0),
 					})
 				}

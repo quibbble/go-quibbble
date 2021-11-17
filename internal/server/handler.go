@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strings"
 	"text/scanner"
-	"time"
 )
 
 type Handler struct {
@@ -45,7 +44,6 @@ func (h *Handler) CreateGame(w http.ResponseWriter, r *http.Request) {
 		NetworkOptions: create.NetworkingCreateGameOptions,
 		GameOptions: &bg.BoardGameOptions{
 			Teams:       t,
-			Seed:        time.Now().UnixNano(),
 			MoreOptions: create.MoreOptions,
 		},
 	}); err != nil {

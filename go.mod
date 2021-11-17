@@ -8,11 +8,11 @@ require (
 	github.com/go-chi/httprate v0.5.2
 	github.com/gorilla/websocket v1.4.2
 	github.com/mitchellh/mapstructure v1.4.2
-	github.com/quibbble/go-boardgame v0.0.0-20211116024457-03be7c971d9a
-	github.com/quibbble/go-carcassonne v0.0.0-20211116024959-9e3275aa82ef
-	github.com/quibbble/go-codenames v0.0.0-20211116024915-f97c35af84e1
-	github.com/quibbble/go-connect4 v0.0.0-20211116024811-4aae2572faac
-	github.com/quibbble/go-tsuro v0.0.0-20211116024835-0fea03522f5d
+	github.com/quibbble/go-boardgame v0.0.0-20211117024030-f22ef30e506d
+	github.com/quibbble/go-carcassonne v0.0.0-20211117031306-f20558e1c5fb
+	github.com/quibbble/go-codenames v0.0.0-20211117031223-6725cba943c0
+	github.com/quibbble/go-connect4 v0.0.0-20211117031057-37528e583611
+	github.com/quibbble/go-tsuro v0.0.0-20211117031142-2bd109670ff3
 	github.com/rs/zerolog v1.26.0
 	github.com/spf13/viper v1.9.0
 	github.com/unrolled/render v1.4.0
