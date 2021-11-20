@@ -76,12 +76,12 @@ type OutboundGameMessage struct {
 	TurnTimeLeft string `json:",omitempty"`
 }
 
-// OutboundChatMessage is the list of chat logs
+// OutboundChatMessage is the most recent chat message
 type OutboundChatMessage struct {
 	Type string
 
-	// Chat is a mapping from player name to message
-	Chat []*ChatMessage
+	// Chat the most recent message
+	ChatMsg *ChatMessage
 }
 
 // OutboundConnectedMessage is the players connected to the game

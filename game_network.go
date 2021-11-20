@@ -15,7 +15,7 @@ func NewGameNetwork(options GameNetworkOptions) *GameNetwork {
 	for _, builder := range options.Games {
 		hub := newGameHub(builder, options.GameExpiry, options.Adapters)
 		go hub.Start()
-		hubs[builder.Key()] = hub
+		hubs[strings.ToLower(builder.Key())] = hub
 	}
 	return &GameNetwork{
 		hubs: hubs,
@@ -23,7 +23,7 @@ func NewGameNetwork(options GameNetworkOptions) *GameNetwork {
 }
 
 func (n *GameNetwork) CreateGame(options CreateGameOptions) error {
-	hub, ok := n.hubs[options.NetworkOptions.GameKey]
+	hub, ok := n.hubs[strings.ToLower(options.NetworkOptions.GameKey)]
 	if !ok {
 		return fmt.Errorf("game key '%s' does not exist", options.NetworkOptions.GameKey)
 	}
@@ -34,7 +34,7 @@ func (n *GameNetwork) CreateGame(options CreateGameOptions) error {
 }
 
 func (n *GameNetwork) LoadGame(options LoadGameOptions) error {
-	hub, ok := n.hubs[options.NetworkOptions.GameKey]
+	hub, ok := n.hubs[strings.ToLower(options.NetworkOptions.GameKey)]
 	if !ok {
 		return fmt.Errorf("game key '%s' does not exist", options.NetworkOptions.GameKey)
 	}
@@ -45,7 +45,7 @@ func (n *GameNetwork) LoadGame(options LoadGameOptions) error {
 }
 
 func (n *GameNetwork) JoinGame(options JoinGameOptions) error {
-	hub, ok := n.hubs[options.GameKey]
+	hub, ok := n.hubs[strings.ToLower(options.GameKey)]
 	if !ok {
 		return fmt.Errorf("game key '%s' does not exist", options.GameKey)
 	}
@@ -53,7 +53,7 @@ func (n *GameNetwork) JoinGame(options JoinGameOptions) error {
 }
 
 func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {
-	hub, ok := n.hubs[gameKey]
+	hub, ok := n.hubs[strings.ToLower(gameKey)]
 	if !ok {
 		return nil, fmt.Errorf("game key '%s' does not exist", gameKey)
 	}

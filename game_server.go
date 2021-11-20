@@ -342,8 +342,8 @@ func (s *gameServer) sendGameMessage(player *player) {
 
 func (s *gameServer) sendChatMessage(player *player) {
 	payload, _ := json.Marshal(OutboundChatMessage{
-		Type: "Chat",
-		Chat: s.chat,
+		Type:    "Chat",
+		ChatMsg: s.chat[len(s.chat)-1],
 	})
 	select {
 	case player.send <- payload:
