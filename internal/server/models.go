@@ -1,8 +1,9 @@
 package server
 
 import (
-	networking "github.com/quibbble/go-boardgame-networking"
 	"time"
+
+	networking "github.com/quibbble/go-boardgame-networking-internal"
 )
 
 var teams = []string{

@@ -1,4 +1,4 @@
-module github.com/quibbble/go-boardgame-networking
+module github.com/quibbble/go-boardgame-networking-internal
 
 go 1.17
 

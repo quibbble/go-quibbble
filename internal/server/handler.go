@@ -1,15 +1,16 @@
 package server
 
 import (
-	"github.com/gorilla/websocket"
-	bg "github.com/quibbble/go-boardgame"
-	networking "github.com/quibbble/go-boardgame-networking"
-	"github.com/quibbble/go-boardgame/pkg/bgn"
-	"github.com/rs/zerolog"
-	"github.com/unrolled/render"
 	"net/http"
 	"strings"
 	"text/scanner"
+
+	"github.com/gorilla/websocket"
+	bg "github.com/quibbble/go-boardgame"
+	networking "github.com/quibbble/go-boardgame-networking-internal"
+	"github.com/quibbble/go-boardgame/pkg/bgn"
+	"github.com/rs/zerolog"
+	"github.com/unrolled/render"
 )
 
 type Handler struct {

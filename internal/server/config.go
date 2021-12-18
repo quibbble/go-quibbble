@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/quibbble/go-boardgame-networking/pkg/http"
-	"github.com/quibbble/go-boardgame-networking/pkg/logger"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/http"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/logger"
 )
 
 type Config struct {
