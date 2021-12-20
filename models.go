@@ -63,40 +63,21 @@ type JoinGameOptions struct {
 	Conn       *websocket.Conn
 }
 
-// OutboundGameMessage is the message sent when returning game information
-type OutboundGameMessage struct {
+// OutboundMessage is the message sent to player
+type OutboundMessage struct {
 	Type string
 
+	Payload interface{}
+}
+
+type outboundNetworkMessage struct {
 	*NetworkingCreateGameOptions
 
-	// Snapshot is the board game data
-	Snapshot *bg.BoardGameSnapshot
+	// Name is the name of the player receiving the message
+	Name string
 
 	// TurnTimeLeft refers to the remaining amount of time in the turn
 	TurnTimeLeft string `json:",omitempty"`
-}
-
-// OutboundChatMessage is the most recent chat message
-type OutboundChatMessage struct {
-	Type string
-
-	// Chat the most recent message
-	ChatMsg *ChatMessage
-}
-
-// OutboundConnectedMessage is the players connected to the game
-type OutboundConnectedMessage struct {
-	Type string
-
-	// Connected is the list of player names to team
-	Connected map[string]string
-}
-
-// OutboundErrorMessage is the message sent when there was an error
-type OutboundErrorMessage struct {
-	Type string
-
-	Error string
 }
 
 // ChatMessage is a message in a chat

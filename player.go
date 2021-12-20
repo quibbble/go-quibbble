@@ -33,7 +33,7 @@ func newPlayer(join JoinGameOptions, server *gameServer) *player {
 		playerName: join.PlayerName,
 		server:     server,
 		conn:       join.Conn,
-		send:       make(chan []byte, 1),
+		send:       make(chan []byte, 2),
 	}
 }
 

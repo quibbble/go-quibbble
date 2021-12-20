@@ -129,6 +129,7 @@ func (s *gameServer) Start() {
 			} else {
 				s.players[player] = ""
 			}
+			s.sendNetworkMessage(player)
 			s.sendGameMessage(player)
 			for player := range s.players {
 				s.sendConnectedMessage(player)
@@ -258,11 +259,7 @@ func (s *gameServer) Start() {
 			snapshot, _ := s.game.GetSnapshot()
 			if len(snapshot.Winners) > 0 {
 				for _, adapter := range s.adapters {
-					adapter.OnGameEnd(&OutboundGameMessage{
-						Type:                        "Game",
-						NetworkingCreateGameOptions: s.options,
-						Snapshot:                    snapshot,
-					})
+					adapter.OnGameEnd(snapshot, s.options)
 				}
 			}
 			if s.timer != nil {
@@ -314,21 +311,38 @@ func (s *gameServer) Join(options JoinGameOptions) error {
 }
 
 func (s *gameServer) sendGameMessage(player *player) {
-	var timeLeft string
-	if s.timer != nil {
-		timeLeft = s.timer.Remaining().String()
-	}
 	var snapshot *bg.BoardGameSnapshot
 	if s.players[player] == "" {
 		snapshot, _ = s.game.GetSnapshot()
 	} else {
 		snapshot, _ = s.game.GetSnapshot(s.players[player])
 	}
-	payload, _ := json.Marshal(OutboundGameMessage{
-		Type:                        "Game",
-		NetworkingCreateGameOptions: s.options,
-		Snapshot:                    snapshot,
-		TurnTimeLeft:                timeLeft,
+	payload, _ := json.Marshal(OutboundMessage{
+		Type:    "Game",
+		Payload: snapshot,
+	})
+	select {
+	case player.send <- payload:
+	default:
+		delete(s.players, player)
+		if !byteChanIsClosed(player.send) {
+			close(player.send)
+		}
+	}
+}
+
+func (s *gameServer) sendNetworkMessage(player *player) {
+	var timeLeft string
+	if s.timer != nil {
+		timeLeft = s.timer.Remaining().String()
+	}
+	payload, _ := json.Marshal(OutboundMessage{
+		Type: "Network",
+		Payload: &outboundNetworkMessage{
+			NetworkingCreateGameOptions: s.options,
+			Name:                        player.playerName,
+			TurnTimeLeft:                timeLeft,
+		},
 	})
 	select {
 	case player.send <- payload:
@@ -341,9 +355,9 @@ func (s *gameServer) sendGameMessage(player *player) {
 }
 
 func (s *gameServer) sendChatMessage(player *player) {
-	payload, _ := json.Marshal(OutboundChatMessage{
+	payload, _ := json.Marshal(OutboundMessage{
 		Type:    "Chat",
-		ChatMsg: s.chat[len(s.chat)-1],
+		Payload: s.chat[len(s.chat)-1],
 	})
 	select {
 	case player.send <- payload:
@@ -360,9 +374,9 @@ func (s *gameServer) sendConnectedMessage(player *player) {
 	for player, team := range s.players {
 		connected[player.playerName] = team
 	}
-	payload, _ := json.Marshal(OutboundConnectedMessage{
-		Type:      "Connected",
-		Connected: connected,
+	payload, _ := json.Marshal(OutboundMessage{
+		Type:    "Connected",
+		Payload: connected,
 	})
 	select {
 	case player.send <- payload:
@@ -375,9 +389,9 @@ func (s *gameServer) sendConnectedMessage(player *player) {
 }
 
 func (s *gameServer) sendErrorMessage(player *player, err error) {
-	payload, _ := json.Marshal(OutboundErrorMessage{
-		Type:  "Error",
-		Error: err.Error(),
+	payload, _ := json.Marshal(OutboundMessage{
+		Type:    "Error",
+		Payload: err.Error(),
 	})
 	select {
 	case player.send <- payload:
