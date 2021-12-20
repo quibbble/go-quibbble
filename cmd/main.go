@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/quibbble/go-boardgame-networking/internal/server"
-	"github.com/quibbble/go-boardgame-networking/pkg/config"
-	"github.com/quibbble/go-boardgame-networking/pkg/logger"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/quibbble/go-boardgame-networking-internal/internal/server"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/config"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/logger"
 )
 
 const (

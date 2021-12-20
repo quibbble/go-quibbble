@@ -3,14 +3,15 @@ package go_boardgame_networking
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	bg "github.com/quibbble/go-boardgame"
-	"github.com/quibbble/go-boardgame-networking/pkg/timer"
-	"github.com/quibbble/go-boardgame/pkg/bgn"
 	"log"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
+	bg "github.com/quibbble/go-boardgame"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/timer"
+	"github.com/quibbble/go-boardgame/pkg/bgn"
 )
 
 // Actions that if sent are performed in the server and not sent down to the game level

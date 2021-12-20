@@ -2,14 +2,15 @@ package server
 
 import (
 	"context"
-	bg "github.com/quibbble/go-boardgame"
-	networking "github.com/quibbble/go-boardgame-networking"
-	"github.com/quibbble/go-boardgame-networking/pkg/http"
-	"github.com/rs/zerolog"
-	"github.com/unrolled/render"
 	"os"
 	"sync"
 	"time"
+
+	bg "github.com/quibbble/go-boardgame"
+	networking "github.com/quibbble/go-boardgame-networking-internal"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/http"
+	"github.com/rs/zerolog"
+	"github.com/unrolled/render"
 )
 
 type Server struct {

@@ -1,11 +1,12 @@
 package go_boardgame_networking
 
 import (
+	"time"
+
 	"github.com/gorilla/websocket"
 	bg "github.com/quibbble/go-boardgame"
-	"github.com/quibbble/go-boardgame-networking/pkg/duration"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/duration"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
-	"time"
 )
 
 // GameNetworkOptions are the options required to create a new network

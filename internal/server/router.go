@@ -1,13 +1,14 @@
 package server
 
 import (
+	"time"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
-	"github.com/quibbble/go-boardgame-networking/pkg/http"
+	"github.com/quibbble/go-boardgame-networking-internal/pkg/http"
 	"github.com/urfave/negroni"
-	"time"
 )
 
 func NewRouter(cfg http.RouterConfig) *chi.Mux {
