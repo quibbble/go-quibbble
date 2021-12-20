@@ -218,19 +218,20 @@ func (s *gameServer) Start() {
 				for _, action := range oldSnapshot.Actions[:len(oldSnapshot.Actions)-1] {
 					_ = game.Do(action)
 				}
+				s.game = game
 				for player := range s.players {
 					s.sendGameMessage(player)
 				}
 				continue
 			case ServerActionResign:
-				if len(s.options.Players) > 0 {
+				if len(s.options.Players) == 0 {
 					s.sendErrorMessage(message.player, fmt.Errorf("%s action not allowed", action.ActionType))
 					continue
 				}
 				// todo add resign field to server and do random action for resigned player if it is their turn
 				continue
 			case ServerActionReset:
-				if len(s.options.Players) == 0 {
+				if len(s.options.Players) > 0 {
 					s.sendErrorMessage(message.player, fmt.Errorf("%s action not allowed", action.ActionType))
 					continue
 				}
@@ -273,7 +274,7 @@ func (s *gameServer) Start() {
 			for player := range s.players {
 				s.sendGameMessage(player)
 			}
-		case _ = <-s.alarm:
+		case <-s.alarm:
 			// do random action(s) for player if time runs out
 			snapshot, _ := s.game.GetSnapshot()
 			if len(snapshot.Targets) == 0 {
