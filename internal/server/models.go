@@ -7,7 +7,7 @@ import (
 )
 
 var teams = []string{
-	"red", "blue", "green", "yellow", "orange", "pink", "purple", "turquoise",
+	"red", "blue", "green", "yellow", "orange", "pink", "purple", "teal",
 }
 
 type NetworkOptions struct {

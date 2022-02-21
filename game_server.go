@@ -170,6 +170,7 @@ func (s *gameServer) Start() {
 					continue
 				}
 				s.players[message.player] = details.Team
+				s.sendGameMessage(message.player)
 				for player := range s.players {
 					s.sendConnectedMessage(player)
 				}
@@ -235,12 +236,24 @@ func (s *gameServer) Start() {
 					s.sendErrorMessage(message.player, fmt.Errorf("%s action not allowed", action.ActionType))
 					continue
 				}
+				var details struct {
+					MoreOptions interface{}
+				}
+				if err := mapstructure.Decode(action.MoreDetails, &details); err != nil {
+					s.sendErrorMessage(message.player, err)
+					continue
+				}
 				var game bg.BoardGameWithBGN
+				var err error
 				if s.create != nil {
-					game, _ = s.builder.CreateWithBGN(&bg.BoardGameOptions{
+					game, err = s.builder.CreateWithBGN(&bg.BoardGameOptions{
 						Teams:       s.create.Teams,
-						MoreOptions: s.create.MoreOptions,
+						MoreOptions: details.MoreOptions,
 					})
+					if err != nil {
+						s.sendErrorMessage(message.player, err)
+						continue
+					}
 				} else {
 					game, _ = s.builder.Load(&bgn.Game{
 						Tags:    s.load.Tags,
