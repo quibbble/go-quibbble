@@ -11,7 +11,8 @@ Router:
   RequestPerSecLimit: 10000
   DisableCors: false
   AllowedOrigins:
-    - "https://www.quibbble.com"
+    - "https://*.quibbble.com"
+    - "https://*.cfregly.com"
     - "http://127.0.0.1:3000"
   AllowedMethods:
     - "GET"
