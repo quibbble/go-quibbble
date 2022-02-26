@@ -2,8 +2,9 @@ package http
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
 	"net/http"
+
+	"github.com/rs/zerolog"
 )
 
 type Server struct {

@@ -2,23 +2,27 @@ package go_boardgame_networking
 
 import (
 	"fmt"
-	"github.com/quibbble/go-boardgame/pkg/bgn"
 	"strings"
+
+	"github.com/quibbble/go-boardgame/pkg/bgn"
+	"github.com/rs/zerolog"
 )
 
 type GameNetwork struct {
 	hubs map[string]*gameHub // mapping from game key to game hub
+	log  zerolog.Logger
 }
 
-func NewGameNetwork(options GameNetworkOptions) *GameNetwork {
+func NewGameNetwork(options GameNetworkOptions, log zerolog.Logger) *GameNetwork {
 	hubs := make(map[string]*gameHub)
 	for _, builder := range options.Games {
-		hub := newGameHub(builder, options.GameExpiry, options.Adapters)
+		hub := newGameHub(builder, options.GameExpiry, options.Adapters, log)
 		go hub.Start()
 		hubs[strings.ToLower(builder.Key())] = hub
 	}
 	return &GameNetwork{
 		hubs: hubs,
+		log:  log,
 	}
 }
 

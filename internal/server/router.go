@@ -7,14 +7,17 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
-	"github.com/quibbble/go-boardgame-networking-internal/pkg/http"
+	"github.com/quibbble/go-quibbble/pkg/http"
+	pkgMiddleware "github.com/quibbble/go-quibbble/pkg/middleware"
+	"github.com/rs/zerolog"
 	"github.com/urfave/negroni"
 )
 
-func NewRouter(cfg http.RouterConfig) *chi.Mux {
+func NewRouter(cfg http.RouterConfig, log zerolog.Logger) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
+	r.Use(pkgMiddleware.RequestLogger(log))
 	r.Use(middleware.Timeout(time.Duration(cfg.TimeoutSec) * time.Second))
 	r.Use(httprate.LimitAll(cfg.RequestPerSecLimit, time.Second))
 	if !cfg.DisableCors {

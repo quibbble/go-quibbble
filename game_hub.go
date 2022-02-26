@@ -2,8 +2,10 @@ package go_boardgame_networking
 
 import (
 	"fmt"
-	bg "github.com/quibbble/go-boardgame"
 	"time"
+
+	bg "github.com/quibbble/go-boardgame"
+	"github.com/rs/zerolog"
 )
 
 // gameHub is a hub for a unique game type i.e. only for connect4 or only for tsuro
@@ -17,9 +19,10 @@ type gameHub struct {
 	done       chan error
 	gameExpiry time.Duration
 	adapters   []NetworkAdapter
+	log        zerolog.Logger
 }
 
-func newGameHub(builder bg.BoardGameWithBGNBuilder, gameExpiry time.Duration, adapters []NetworkAdapter) *gameHub {
+func newGameHub(builder bg.BoardGameWithBGNBuilder, gameExpiry time.Duration, adapters []NetworkAdapter, log zerolog.Logger) *gameHub {
 	return &gameHub{
 		builder:    builder,
 		games:      make(map[string]*gameServer),
@@ -30,6 +33,7 @@ func newGameHub(builder bg.BoardGameWithBGNBuilder, gameExpiry time.Duration, ad
 		done:       make(chan error),
 		gameExpiry: gameExpiry,
 		adapters:   adapters,
+		log:        log,
 	}
 }
 
@@ -43,7 +47,7 @@ func (h *gameHub) Start() {
 				h.done <- fmt.Errorf("game id '%s' already exists", create.NetworkOptions.GameID)
 				continue
 			}
-			server, err := newServer(h.builder, &create, h.adapters)
+			server, err := newServer(h.builder, &create, h.adapters, h.log)
 			if err != nil {
 				h.done <- err
 				continue

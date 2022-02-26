@@ -3,9 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/unrolled/render"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/unrolled/render"
 )
 
 func writeJSONResponse(render *render.Render, w http.ResponseWriter, statusCode int, responseModel interface{}) {

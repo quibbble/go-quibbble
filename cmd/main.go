@@ -4,28 +4,20 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
-	"github.com/quibbble/go-boardgame-networking-internal/internal/server"
-	"github.com/quibbble/go-boardgame-networking-internal/pkg/config"
-	"github.com/quibbble/go-boardgame-networking-internal/pkg/logger"
+	"github.com/quibbble/go-quibbble/internal/server"
+	"github.com/quibbble/go-quibbble/pkg/config"
+	"github.com/quibbble/go-quibbble/pkg/logger"
 )
 
-const (
-	service = "network"
-	prefix  = "NETWORK"
-)
+const service = "quibbble"
 
 func main() {
 	cfg := server.Config{}
-	if err := config.NewConfig(service, prefix, &cfg); err != nil {
+	if err := config.NewConfig(service, strings.ToUpper(service), &cfg); err != nil {
 		panic(err)
-	}
-
-	// override port - for heroku deployment
-	port := os.Getenv("PORT")
-	if port != "" {
-		cfg.Server.Port = port
 	}
 
 	log, err := logger.NewLogger(cfg.Log, cfg.Environment)

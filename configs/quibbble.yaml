@@ -8,32 +8,25 @@ Log:
 
 Router:
   TimeoutSec: 10
-  RequestPerSecLimit: 10000
+  RequestPerSecLimit: 1000
   DisableCors: false
   AllowedOrigins:
     - "https://*.quibbble.com"
-    - "https://*.cfregly.com"
     - "http://127.0.0.1:3000"
   AllowedMethods:
     - "GET"
     - "POST"
-    - "PUT"
-    - "DELETE"
-    - "OPTIONS"
   AllowedHeaders:
     - "Origin"
-    - "X-Requested-With"
     - "Content-Type"
     - "Accept"
-    - "X-Auth-Token"
-    - "Access-Control-Allow-Headers"
-    - "Authorization"
 
 Server:
   Port: "8080"
 
 Network:
   Games:
+    - "Tic-Tac-Toe"
     - "Carcassonne"
     - "Connect4"
     - "Codenames"

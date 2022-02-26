@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"github.com/rs/zerolog"
 	"os"
+
+	"github.com/rs/zerolog"
 )
 
 func NewLogger(cfg Config, environment string) (zerolog.Logger, error) {

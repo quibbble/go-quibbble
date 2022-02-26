@@ -7,8 +7,8 @@ import (
 	"time"
 
 	bg "github.com/quibbble/go-boardgame"
-	networking "github.com/quibbble/go-boardgame-networking-internal"
-	"github.com/quibbble/go-boardgame-networking-internal/pkg/http"
+	networking "github.com/quibbble/go-quibbble"
+	"github.com/quibbble/go-quibbble/pkg/http"
 	"github.com/rs/zerolog"
 	"github.com/unrolled/render"
 )
@@ -34,9 +34,9 @@ func NewServer(cfg Config, log zerolog.Logger) (*Server, error) {
 		Games:      g,
 		Adapters:   a,
 		GameExpiry: cfg.Network.GameExpiry,
-	})
+	}, log)
 	handler := NewHandler(log, render.New(), network)
-	r := NewRouter(cfg.Router)
+	r := NewRouter(cfg.Router, log)
 	r = AddRoutes(r, handler)
 	return &Server{
 		cfg:    cfg,

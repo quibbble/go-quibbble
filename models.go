@@ -5,8 +5,8 @@ import (
 
 	"github.com/gorilla/websocket"
 	bg "github.com/quibbble/go-boardgame"
-	"github.com/quibbble/go-boardgame-networking-internal/pkg/duration"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
+	"github.com/quibbble/go-quibbble/pkg/duration"
 )
 
 // GameNetworkOptions are the options required to create a new network
@@ -46,7 +46,7 @@ type NetworkingCreateGameOptions struct {
 	// This means anyone not in these lists may not join the game
 	Players map[string][]string `json:",omitempty"`
 
-	// TurnLengthSeconds refers to the max length of time each player may take per turn - optional
+	// TurnLength refers to the max length of time each player may take per turn - optional
 	// nil means no turn length
 	TurnLength *duration.Duration `json:",omitempty"`
 

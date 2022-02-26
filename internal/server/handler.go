@@ -7,8 +7,8 @@ import (
 
 	"github.com/gorilla/websocket"
 	bg "github.com/quibbble/go-boardgame"
-	networking "github.com/quibbble/go-boardgame-networking-internal"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
+	networking "github.com/quibbble/go-quibbble"
 	"github.com/rs/zerolog"
 	"github.com/unrolled/render"
 )

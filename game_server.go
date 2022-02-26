@@ -10,8 +10,9 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	bg "github.com/quibbble/go-boardgame"
-	"github.com/quibbble/go-boardgame-networking-internal/pkg/timer"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
+	"github.com/quibbble/go-quibbble/pkg/timer"
+	"github.com/rs/zerolog"
 )
 
 // Actions that if sent are performed in the server and not sent down to the game level
@@ -40,9 +41,10 @@ type gameServer struct {
 	process   chan *message
 	done      chan error
 	adapters  []NetworkAdapter
+	log       zerolog.Logger
 }
 
-func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, adapters []NetworkAdapter) (*gameServer, error) {
+func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, adapters []NetworkAdapter, log zerolog.Logger) (*gameServer, error) {
 	game, err := builder.CreateWithBGN(options.GameOptions)
 	if err != nil {
 		return nil, err
@@ -71,6 +73,7 @@ func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, a
 		process:   make(chan *message),
 		done:      make(chan error),
 		adapters:  adapters,
+		log:       log,
 	}, nil
 }
 
@@ -267,6 +270,10 @@ func (s *gameServer) Start() {
 				continue
 			}
 			// try board game action
+			if s.players[message.player] != action.Team {
+				s.sendErrorMessage(message.player, fmt.Errorf("cannot perform game action for another team"))
+				continue
+			}
 			if err := s.game.Do(&action); err != nil {
 				s.sendErrorMessage(message.player, err)
 				continue
@@ -315,7 +322,7 @@ func (s *gameServer) Start() {
 }
 
 func (s *gameServer) Join(options JoinGameOptions) error {
-	player := newPlayer(options, s)
+	player := newPlayer(options, s, s.log)
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	go player.ReadPump(wg)
