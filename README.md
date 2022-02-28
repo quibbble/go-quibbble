@@ -5,7 +5,8 @@ Go-quibbble contains the backend game service for all Quibbble games. This provi
 ## Status
 
 Go-quibbble is a functional work in progress with the following futures still to be implemented:
-- Secure games: games that require some form of authentication to join/play allowing for anonymous competitive play.
+- Secure games: games that require some form of authentication i.e. accounts to join/play allowing for competitive play, stats collection, etc.
+- Improved documentation and code coverage.
 
 ## Add Your Game
 
