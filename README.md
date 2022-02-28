@@ -19,13 +19,13 @@ Go-quibbble is a functional work in progress with the following futures still to
 ## Build and Run
 
 ### Go
-```
+```bash
 $ go build -o quibbble cmd/main.go
 $ ./quibbble
 ```
 
 ### Docker
-```
+```bash
 $ docker build --tag quibbble/quibbble:${TAG} -f build/Dockerfile .
 $ docker run -d --name quibbble -p 8080:8080 quibbble/quibbble:${TAG}
 ```
@@ -34,7 +34,7 @@ $ docker run -d --name quibbble -p 8080:8080 quibbble/quibbble:${TAG}
 
 ### Create Game
 
-```
+```bash
 curl --request POST 'http://localhost:8080/game/create' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -49,7 +49,7 @@ curl --request POST 'http://localhost:8080/game/create' \
 
 ### Load Game
 
-```
+```bash
 curl --request POST 'http://localhost:8080/game/load' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -61,13 +61,13 @@ curl --request POST 'http://localhost:8080/game/load' \
 
 ### Get BGN
 
-```
+```bash
 curl 'http://localhost:8080/game/bgn?GameKey=Tic-Tac-Toe&GameID=example'
 ```
 
 ### Health Check
 
-```
+```bash
 curl 'http://localhost:8080/health'
 ```
 
@@ -82,8 +82,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ```
 
 #### You Recieve
-
-```
+```json
 {
     "Type": "Network",
     "Payload": {
@@ -94,7 +93,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 }
 ```
 
-```
+```json
 {
     "Type": "Game",
     "Payload": {
@@ -121,7 +120,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ```
 
 #### All Recieve
-```
+```json
 {
     "Type": "Connected",
     "Payload": {
@@ -134,7 +133,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ### Set Team
 
 #### Send Message
-```
+```json
 {
     "ActionType": "SetTeam",
     "MoreDetails": {
@@ -144,8 +143,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ```
 
 #### All Recieve
-
-```
+```json
 {
     "Type": "Connected",
     "Payload": {
@@ -158,8 +156,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ### Game Action
 
 #### Send Message
-
-```
+```json
 {
     "ActionType": "MarkLocation",
     "Team": "red",
@@ -171,8 +168,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ```
 
 #### All Recieve
-
-```
+```json
 {
     "Type": "Game",
     "Payload": {
@@ -211,16 +207,14 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ### Undo Game Action
 
 #### Send Message
-
-```
+```json
 {
     "ActionType": "Undo"
 }
 ```
 
 #### All Recieve
-
-```
+```json
 {
     "Type": "Game",
     "Payload": {
@@ -249,8 +243,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ### Chat 
 
 #### Send Message
-
-```
+```json
 {
     "ActionType": "Chat",
     "MoreDetails": {
@@ -260,8 +253,7 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ```
 
 #### All Recieve
-
-```
+```json
 {
     "Type": "Chat",
     "Payload": {
@@ -274,16 +266,14 @@ ws://localhost:8080/game/join?GameKey=Tic-Tac-Toe&GameID=example
 ### Reset
 
 #### Send Message
-
-```
+```json
 {
     "ActionType": "Reset"
 }
 ```
 
 #### All Recieve
-
-```
+```json
 {
     "Type": "Game",
     "Payload": {
