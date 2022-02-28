@@ -14,7 +14,7 @@ COPY . .
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.31.0
 
 # Build binary
-RUN GOOS=linux go build -a -o network cmd/main.go
+RUN GOOS=linux go build -a -o quibbble cmd/main.go
 
 # Build image
 FROM alpine:3.14
@@ -23,9 +23,9 @@ RUN apk update && apk upgrade
 
 # Copy config and binary
 WORKDIR /root/
-COPY ./configs/network.yaml ./configs/
-COPY --from=builder /app/network .
+COPY ./configs/quibbble.yaml ./configs/
+COPY --from=builder /app/quibbble .
 
 # Entry and port
-CMD ["./network"]
+CMD ["./quibbble"]
 EXPOSE 8080
