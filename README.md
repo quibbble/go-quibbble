@@ -26,7 +26,7 @@ $ ./quibbble
 
 ### Docker
 ```bash
-$ docker build --tag quibbble/quibbble:${TAG} -f build/Dockerfile .
+$ docker build --tag quibbble/quibbble:${TAG} --platform linux/amd64 -f build/Dockerfile .
 $ docker run -d --name quibbble -p 8080:8080 quibbble/quibbble:${TAG}
 ```
 
