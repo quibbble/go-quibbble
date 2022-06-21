@@ -2,9 +2,9 @@
 # local - pretty text logging
 # stage - none
 # prod - none
-Environment: "local"
+Environment: "prod"
 Log:
-  Level: "debug"
+  Level: "info"
 
 Router:
   TimeoutSec: 10
@@ -12,7 +12,7 @@ Router:
   DisableCors: false
   AllowedOrigins:
     - "https://*.quibbble.com"
-    - "http://127.0.0.1:3000"
+    - "http://127.0.0.1:*"
   AllowedMethods:
     - "GET"
     - "POST"
