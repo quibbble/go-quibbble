@@ -1,5 +1,5 @@
 # Build the binary and run CI
-FROM golang:1.18-alpine AS builder
+FROM golang:1.17-alpine AS builder
 
 RUN apk update && apk upgrade
 
@@ -17,7 +17,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 RUN GOOS=linux go build -a -o quibbble cmd/main.go
 
 # Build image
-FROM alpine:3.14
+FROM alpine:3.16
 
 RUN apk update && apk upgrade
 
