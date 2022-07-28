@@ -172,8 +172,8 @@ github.com/quibbble/go-codenames v1.0.1 h1:aNxJaaL2Rh5CoOb4oH65zIphEo+O8Jwdq1rIy
 github.com/quibbble/go-codenames v1.0.1/go.mod h1:S6aIbrVhE5XSnKOodaPp5XsgdgxuvUm79g5Y+P/rJok=
 github.com/quibbble/go-connect4 v1.0.1 h1:XzGojRTYD6t04hMVehcw6V2ueeIxPOLYrzaB1jBVb9g=
 github.com/quibbble/go-connect4 v1.0.1/go.mod h1:l7fngJ97b6VT0WTtP4MOTNQCf+3bXwfo3IHWyE52o/c=
-github.com/quibbble/go-tsuro v1.0.2 h1:Es0wuq2fASaF/eBZedS7wWX4V6vfAmtf96zwUahgzBA=
-github.com/quibbble/go-tsuro v1.0.2/go.mod h1:2vHJwf3U6k/uPJ/l2Oc3hCSC67ukDHn1oRpBSW3IhzQ=
+github.com/quibbble/go-tsuro v1.0.3 h1:DdtThI42/yJp8DJccvMc6S4/w9m3+UiReIDwA0F5Luk=
+github.com/quibbble/go-tsuro v1.0.3/go.mod h1:2vHJwf3U6k/uPJ/l2Oc3hCSC67ukDHn1oRpBSW3IhzQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.6.1 h1:/FiVV8dS/e+YqF2JvO3yXRFbBLTIuSDkuC7aBOAvL+k=
 github.com/rs/xid v1.3.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=

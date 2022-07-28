@@ -13,7 +13,7 @@ require (
 	github.com/quibbble/go-carcassonne v1.0.1
 	github.com/quibbble/go-codenames v1.0.1
 	github.com/quibbble/go-connect4 v1.0.1
-	github.com/quibbble/go-tsuro v1.0.2
+	github.com/quibbble/go-tsuro v1.0.3
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/viper v1.12.0
 	github.com/unrolled/render v1.5.0
