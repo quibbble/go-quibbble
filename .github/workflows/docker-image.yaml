@@ -2,7 +2,6 @@ name: 'Docker Image CI'
 
 on:
   push:
-    branches: [ 'main' ]
     tags: [ 'v*.*.*' ]
 
 jobs:
@@ -23,8 +22,8 @@ jobs:
       uses: 'google-github-actions/auth@v0'
       with:
         token_format: 'access_token'
-        workload_identity_provider: 'projects/405124156249/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-        service_account: 'github-machine-user@quibbble-7236c.iam.gserviceaccount.com'
+        workload_identity_provider: 'projects/405124156249/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider'
+        service_account: 'gh-machine-user@quibbble-7236c.iam.gserviceaccount.com'
 
     - name: 'Login to Google Artifact Registry'
       uses: 'docker/login-action@v2'
