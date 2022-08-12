@@ -1,0 +1,41 @@
+name: 'Docker Image CI'
+
+on:
+  push:
+    tags: [ 'v*.*.*' ]
+
+jobs:
+
+  build:
+
+    runs-on: 'ubuntu-latest'
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - uses: 'actions/checkout@v3'
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        workload_identity_provider: 'projects/405124156249/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+        service_account: 'github-machine-user@quibbble-7236c.iam.gserviceaccount.com'
+
+    - id: 'gcloud'
+      name: 'Set up Google Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v0'
+
+    - name: 'Login to Google Cloud Artifact Registry'
+      run: 'gcloud auth configure-docker us-west1-docker.pkg.dev'
+
+    - name: 'Set Docker Image Tag ENV'
+      run: 'echo "DOCKER_IMAGE_TAG=us-west1-docker.pkg.dev/quibbble-7236c/quibbble/quibbble:${GITHUB_REF#refs/*/}" >> $GITHUB_ENV'
+
+    - name: 'Build the Docker Image'
+      run: 'docker build --tag ${DOCKER_IMAGE_TAG} --platform linux/amd64 -f build/Dockerfile .'
+
+    - name: 'Push the Docker Image'
+      run: 'docker push ${DOCKER_IMAGE_TAG}'
