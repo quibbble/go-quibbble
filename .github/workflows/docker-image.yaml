@@ -24,11 +24,11 @@ jobs:
         workload_identity_provider: 'projects/405124156249/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
         service_account: 'github-machine-user@quibbble-7236c.iam.gserviceaccount.com'
 
-    - id: 'gcloud'
-      name: 'Set up Google Cloud SDK'
+    - name: 'Set up Google Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v0'
 
-    - name: 'Login to Google Cloud Artifact Registry'
+    - id: 'gcloud'
+      name: 'Login to Google Cloud Artifact Registry'
       run: 'gcloud auth configure-docker us-west1-docker.pkg.dev'
 
     - name: 'Set Docker Image Tag ENV'
