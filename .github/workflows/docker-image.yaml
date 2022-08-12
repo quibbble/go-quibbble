@@ -2,6 +2,7 @@ name: 'Docker Image CI'
 
 on:
   push:
+    branches: [ 'main' ]
     tags: [ 'v*.*.*' ]
 
 jobs:
@@ -21,6 +22,7 @@ jobs:
       name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v0'
       with:
+        token_format: 'access_token'
         workload_identity_provider: 'projects/405124156249/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
         service_account: 'github-machine-user@quibbble-7236c.iam.gserviceaccount.com'
 
