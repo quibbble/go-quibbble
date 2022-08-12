@@ -12,6 +12,7 @@ import (
 type gameHub struct {
 	builder    bg.BoardGameWithBGNBuilder
 	games      map[string]*gameServer // mapping from game ID to game server
+	cleanup    map[string]chan bool   // mapping from game ID to game's done channel that should be closed on game cleanup
 	create     chan CreateGameOptions
 	load       chan LoadGameOptions
 	join       chan JoinGameOptions
@@ -26,6 +27,7 @@ func newGameHub(builder bg.BoardGameWithBGNBuilder, gameExpiry time.Duration, ad
 	return &gameHub{
 		builder:    builder,
 		games:      make(map[string]*gameServer),
+		cleanup:    make(map[string]chan bool),
 		create:     make(chan CreateGameOptions),
 		load:       make(chan LoadGameOptions),
 		join:       make(chan JoinGameOptions),
@@ -52,8 +54,10 @@ func (h *gameHub) Start() {
 				h.done <- err
 				continue
 			}
-			go server.Start()
+			cleanup := make(chan bool)
+			go server.Start(cleanup)
 			h.games[create.NetworkOptions.GameID] = server
+			h.cleanup[create.NetworkOptions.GameID] = cleanup
 			h.done <- nil
 		case load := <-h.load:
 			_, ok := h.games[load.NetworkOptions.GameID]
@@ -66,8 +70,10 @@ func (h *gameHub) Start() {
 				h.done <- err
 				continue
 			}
-			go server.Start()
+			cleanup := make(chan bool)
+			go server.Start(cleanup)
 			h.games[load.NetworkOptions.GameID] = server
+			h.cleanup[load.NetworkOptions.GameID] = cleanup
 			h.done <- nil
 		case join := <-h.join:
 			server, ok := h.games[join.GameID]
@@ -77,6 +83,8 @@ func (h *gameHub) Start() {
 			}
 			h.done <- server.Join(join)
 		case gameID := <-h.close:
+			close(h.cleanup[gameID])
+			delete(h.cleanup, gameID)
 			delete(h.games, gameID)
 		}
 	}

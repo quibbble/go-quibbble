@@ -108,7 +108,7 @@ func newServerWithBGN(builder bg.BoardGameWithBGNBuilder, options *LoadGameOptio
 	}, nil
 }
 
-func (s *gameServer) Start() {
+func (s *gameServer) Start(done <-chan bool) {
 	for {
 		select {
 		case player := <-s.join:
@@ -316,6 +316,8 @@ func (s *gameServer) Start() {
 			for player := range s.players {
 				s.sendGameMessage(player)
 			}
+		case <-done:
+			return
 		}
 	}
 }
