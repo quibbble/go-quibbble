@@ -1,7 +1,7 @@
 # Build the binary and run CI
 FROM golang:1.18-alpine3.16 AS builder
 
-RUN apk update && apk upgrade
+RUN apk update && apk upgrade && apk --no-cache add curl
 
 # Intall gcc
 RUN apk add build-base
