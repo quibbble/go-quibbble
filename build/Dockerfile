@@ -17,7 +17,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 RUN GOOS=linux go build -a -o quibbble cmd/main.go
 
 # Build image
-FROM alpine:3.16
+FROM alpine:3.16.2
 
 RUN apk update && apk upgrade
 

@@ -26,8 +26,8 @@ $ ./quibbble
 
 ### Docker
 ```bash
-$ docker build --tag quibbble/quibbble:${TAG} --platform linux/amd64 -f build/Dockerfile .
-$ docker run -d --name quibbble -p 8080:8080 quibbble/quibbble:${TAG}
+$ docker build --tag quibbble:${TAG} --platform linux/amd64 -f build/Dockerfile .
+$ docker run -d --name quibbble -p 8080:8080 --init -m 512m --cpus=1 quibbble:${TAG}
 ```
 
 ## REST API
@@ -69,6 +69,18 @@ curl 'http://localhost:8080/game/bgn?GameKey=Tic-Tac-Toe&GameID=example'
 
 ```bash
 curl 'http://localhost:8080/health'
+```
+
+### Get Game Stats
+
+```bash
+curl 'http://localhost:8080/game/stats'
+```
+
+### Profiling
+
+```bash
+curl 'http://localhost:8080/debug/pprof'
 ```
 
 ## Websocket Messaging

@@ -149,6 +149,10 @@ func (h *Handler) GetBGN(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(game.String()))
 }
 
+func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
+	writeJSONResponse(h.render, w, http.StatusOK, h.network.GetStats())
+}
+
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(http.StatusText(http.StatusOK)))

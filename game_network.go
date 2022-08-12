@@ -13,6 +13,11 @@ type GameNetwork struct {
 	log  zerolog.Logger
 }
 
+type GameStats struct {
+	CurrentGameCount   map[string]int
+	CurrentPlayerCount map[string]int
+}
+
 func NewGameNetwork(options GameNetworkOptions, log zerolog.Logger) *GameNetwork {
 	hubs := make(map[string]*gameHub)
 	for _, builder := range options.Games {
@@ -54,6 +59,21 @@ func (n *GameNetwork) JoinGame(options JoinGameOptions) error {
 		return fmt.Errorf("game key '%s' does not exist", options.GameKey)
 	}
 	return hub.Join(options)
+}
+
+func (n *GameNetwork) GetStats() *GameStats {
+	stats := &GameStats{
+		CurrentGameCount:   make(map[string]int),
+		CurrentPlayerCount: make(map[string]int),
+	}
+	for _, hub := range n.hubs {
+		stats.CurrentGameCount[hub.builder.Key()] = len(hub.games)
+		stats.CurrentPlayerCount[hub.builder.Key()] = 0
+		for _, game := range hub.games {
+			stats.CurrentPlayerCount[hub.builder.Key()] += len(game.players)
+		}
+	}
+	return stats
 }
 
 func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {

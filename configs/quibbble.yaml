@@ -2,13 +2,13 @@
 # local - pretty text logging
 # stage - none
 # prod - none
-Environment: "prod"
+Environment: "local"
 Log:
-  Level: "info"
+  Level: "debug"
 
 Router:
   TimeoutSec: 10
-  RequestPerSecLimit: 1000
+  RequestPerSecLimit: 5
   DisableCors: false
   AllowedOrigins:
     - "https://*.quibbble.com"
@@ -26,10 +26,10 @@ Server:
 
 Network:
   Games:
-    - "Tic-Tac-Toe"
     - "Carcassonne"
     - "Connect4"
-    - "Codenames"
     - "Tsuro"
+    # - "Tic-Tac-Toe"
+    # - "Codenames"
   Adapters:
-  GameExpiry: "3h"
+  GameExpiry: "1h"

@@ -3,7 +3,6 @@ package go_boardgame_networking
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -298,7 +297,7 @@ func (s *gameServer) Start() {
 			// do random action(s) for player if time runs out
 			snapshot, _ := s.game.GetSnapshot()
 			if len(snapshot.Targets) == 0 {
-				log.Println("cannot do random action as no valid targets exist")
+				s.log.Debug().Msg("cannot do random action as no valid targets exist")
 				continue
 			}
 			turn := snapshot.Turn

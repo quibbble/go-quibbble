@@ -105,10 +105,11 @@ func (h *gameHub) Join(options JoinGameOptions) error {
 
 func (h *gameHub) clean() {
 	// every hour check if game is passed gameExpiry in which case it is removed
-	for range time.Tick(time.Hour) {
+	for range time.Tick(time.Minute) {
 		for gameID, server := range h.games {
 			deleteTime := server.createdAt.Add(h.gameExpiry)
 			if time.Now().After(deleteTime) {
+				h.log.Debug().Msgf("cleaning '%s' with id '%s'", h.builder.Key(), gameID)
 				h.close <- gameID
 			}
 		}
