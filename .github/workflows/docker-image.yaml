@@ -27,9 +27,11 @@ jobs:
     - name: 'Set up Google Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v0'
 
-    - id: 'gcloud'
-      name: 'Login to Google Cloud Artifact Registry'
+    - name: 'Login to Google Cloud Artifact Registry'
       run: 'gcloud auth configure-docker us-west1-docker.pkg.dev'
+
+    - name: 'Docker Login With Google Cloud'
+      run: gcloud auth print-access-token --impersonate-service-account github-machine-user | docker login -u oauth2accesstoken --password-stdin https://us-west1-docker.pkg.dev
 
     - name: 'Set Docker Image Tag ENV'
       run: 'echo "DOCKER_IMAGE_TAG=us-west1-docker.pkg.dev/quibbble-7236c/quibbble/quibbble:${GITHUB_REF#refs/*/}" >> $GITHUB_ENV'
