@@ -21,16 +21,15 @@ jobs:
       name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v0'
       with:
-        token_format: 'access_token'
         workload_identity_provider: 'projects/405124156249/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
         service_account: 'github-machine-user@quibbble-7236c.iam.gserviceaccount.com'
 
-    - name: Login to Google Artifact Registry
-      uses: docker/login-action@v2
+    - name: 'Login to Google Artifact Registry'
+      uses: 'docker/login-action@v2'
       with:
-        registry: us-west1-docker.pkg.dev
-        username: oauth2accesstoken
-        password: ${{ steps.auth.outputs.access_token }}
+        registry: 'us-west1-docker.pkg.dev'
+        username: 'oauth2accesstoken'
+        password: '${{ steps.auth.outputs.access_token }}'
 
     - name: 'Set Docker Image Tag ENV'
       run: 'echo "DOCKER_IMAGE_TAG=us-west1-docker.pkg.dev/quibbble-7236c/quibbble/quibbble:${GITHUB_REF#refs/*/}" >> $GITHUB_ENV'
