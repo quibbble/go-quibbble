@@ -296,13 +296,18 @@ func (s *gameServer) Start(done <-chan bool) {
 		case <-s.alarm:
 			// do random action(s) for player if time runs out
 			snapshot, _ := s.game.GetSnapshot()
-			if len(snapshot.Targets) == 0 {
+			targets, ok := snapshot.Targets.([]*bg.BoardGameAction)
+			if !ok {
+				s.log.Debug().Msg("cannot do random action as targets are not of type []*bg.BoardGameAction")
+				continue
+			}
+			if len(targets) == 0 {
 				s.log.Debug().Msg("cannot do random action as no valid targets exist")
 				continue
 			}
 			turn := snapshot.Turn
 			for len(snapshot.Winners) == 0 && turn == snapshot.Turn {
-				action := snapshot.Targets[rand.Intn(len(snapshot.Targets))]
+				action := targets[rand.Intn(len(targets))]
 				_ = s.game.Do(action)
 				snapshot, _ = s.game.GetSnapshot()
 			}

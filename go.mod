@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/quibbble/go-boardgame v1.0.0
+	github.com/quibbble/go-boardgame v1.0.5
 	github.com/quibbble/go-carcassonne v1.0.1
 	github.com/quibbble/go-codenames v1.0.1
 	github.com/quibbble/go-connect4 v1.0.1
