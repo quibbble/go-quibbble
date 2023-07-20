@@ -110,7 +110,7 @@ func newServerWithBGN(builder bg.BoardGameWithBGNBuilder, options *LoadGameOptio
 
 func (s *gameServer) Start(done <-chan bool) {
 	// catch any panics and close the game out gracefully
-	// prevents the server from crashing due to bugs a game
+	// prevents the server from crashing due to bugs in a game
 	defer func() {
 		if r := recover(); r != nil {
 			msg := fmt.Sprintf("%v from game key '%s' and id '%s'", r, s.options.GameKey, s.options.GameID)
