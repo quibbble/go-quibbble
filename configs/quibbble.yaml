@@ -28,11 +28,10 @@ Server:
 Network:
   Games:
     - "Carcassonne"
+    - "Codenames"
     - "Connect4"
-    - "Tsuro"
     - "Stratego"
-    - "XAlpha"
-    # - "Tic-Tac-Toe"
-    # - "Codenames"
+    - "Tic-Tac-Toe"
+    - "Tsuro"
   Adapters:
   GameExpiry: "1h"
