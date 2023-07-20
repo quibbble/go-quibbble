@@ -7,7 +7,8 @@ import (
 	"time"
 
 	bg "github.com/quibbble/go-boardgame"
-	networking "github.com/quibbble/go-quibbble"
+	networking "github.com/quibbble/go-quibbble/internal/networking"
+	"github.com/quibbble/go-quibbble/internal/networking/adapters"
 	"github.com/quibbble/go-quibbble/pkg/http"
 	"github.com/rs/zerolog"
 	"github.com/unrolled/render"
@@ -27,9 +28,10 @@ func NewServer(cfg Config, log zerolog.Logger) (*Server, error) {
 	for _, game := range cfg.Network.Games {
 		g = append(g, games[game])
 	}
-	for _, adapter := range cfg.Network.Adapters {
-		a = append(a, adapters[adapter])
-	}
+
+	redisAdapter := adapters.NewRedisAdapter(&cfg.Network.Adapters.RedisAdapter, log)
+	a = append(a, &redisAdapter)
+
 	network := networking.NewGameNetwork(networking.GameNetworkOptions{
 		Games:      g,
 		Adapters:   a,

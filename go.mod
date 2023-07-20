@@ -6,6 +6,7 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/httprate v0.7.4
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gorilla/websocket v1.5.0
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
@@ -29,6 +30,8 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mroth/weightedrand v1.0.0 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.27.8 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/rs/xid v1.4.0 // indirect
 	github.com/spf13/afero v1.9.5 // indirect

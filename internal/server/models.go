@@ -3,7 +3,8 @@ package server
 import (
 	"time"
 
-	networking "github.com/quibbble/go-quibbble"
+	networking "github.com/quibbble/go-quibbble/internal/networking"
+	"github.com/quibbble/go-quibbble/internal/networking/adapters"
 )
 
 var teams = []string{
@@ -12,8 +13,12 @@ var teams = []string{
 
 type NetworkOptions struct {
 	Games      []string
-	Adapters   []string
+	Adapters   Adapters
 	GameExpiry time.Duration
+}
+
+type Adapters struct {
+	RedisAdapter adapters.RedisAdapterConfig
 }
 
 type CreateGameRequest struct {

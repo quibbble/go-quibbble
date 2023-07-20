@@ -34,4 +34,10 @@ Network:
     - "Tic-Tac-Toe"
     - "Tsuro"
   Adapters:
+    RedisAdapter:
+      # override the below values with via env
+      Enabled: false                     # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_ENABLED
+      Host: <REDIS_ADAPTER_HOST>         # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_HOST
+      Password: <REDIS_ADAPTER_PASSWORD> # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_PASSWORD
+      IgnoreGameID: ""                   # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_IGNOREGAMEID
   GameExpiry: "3h"
