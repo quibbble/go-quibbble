@@ -34,4 +34,4 @@ Network:
     - "Tic-Tac-Toe"
     - "Tsuro"
   Adapters:
-  GameExpiry: "1h"
+  GameExpiry: "3h"
