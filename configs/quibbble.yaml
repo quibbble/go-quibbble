@@ -13,6 +13,7 @@ Router:
   AllowedOrigins:
     - "https://*.quibbble.com"
     - "http://127.0.0.1:*"
+    - "http://localhost:*"
   AllowedMethods:
     - "GET"
     - "POST"
@@ -29,6 +30,8 @@ Network:
     - "Carcassonne"
     - "Connect4"
     - "Tsuro"
+    - "Stratego"
+    - "XAlpha"
     # - "Tic-Tac-Toe"
     # - "Codenames"
   Adapters:

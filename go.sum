@@ -165,8 +165,6 @@ github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qR
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
-github.com/quibbble/go-boardgame v1.0.4 h1:LY0bKwFpknUGyeF/FU9oHXQEdMdF2DboBzUaJfh4yCM=
-github.com/quibbble/go-boardgame v1.0.4/go.mod h1:oK+f5lekO5RySxqYoI1DSpu57zZBT1aDQGvuvwLpi9M=
 github.com/quibbble/go-boardgame v1.0.5 h1:TwhbUYhXS/TwL0Z7BpSUZNT3qNppru0fsFyyd1e9QSs=
 github.com/quibbble/go-boardgame v1.0.5/go.mod h1:oK+f5lekO5RySxqYoI1DSpu57zZBT1aDQGvuvwLpi9M=
 github.com/quibbble/go-carcassonne v1.0.1 h1:zHU/Kt+l3MoA4K1nl5utfMXSaZtBQXDI1OhdnK2YB8g=
@@ -175,6 +173,8 @@ github.com/quibbble/go-codenames v1.0.1 h1:aNxJaaL2Rh5CoOb4oH65zIphEo+O8Jwdq1rIy
 github.com/quibbble/go-codenames v1.0.1/go.mod h1:S6aIbrVhE5XSnKOodaPp5XsgdgxuvUm79g5Y+P/rJok=
 github.com/quibbble/go-connect4 v1.0.1 h1:XzGojRTYD6t04hMVehcw6V2ueeIxPOLYrzaB1jBVb9g=
 github.com/quibbble/go-connect4 v1.0.1/go.mod h1:l7fngJ97b6VT0WTtP4MOTNQCf+3bXwfo3IHWyE52o/c=
+github.com/quibbble/go-stratego v1.0.0 h1:Q8TUzy3TpKVdQGmPlU68xOVmhD3WQ7xSi2x9cI0EbNo=
+github.com/quibbble/go-stratego v1.0.0/go.mod h1:A3PqQpOorlQLAgRRzt0BNsn7tt5yNuz3fyVK0Hvelj0=
 github.com/quibbble/go-tsuro v1.0.4 h1:8ECiV8G0nM4FLIXYtEpVoGQ7VQUCd4fmK5TorFl4r+8=
 github.com/quibbble/go-tsuro v1.0.4/go.mod h1:2vHJwf3U6k/uPJ/l2Oc3hCSC67ukDHn1oRpBSW3IhzQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
@@ -349,8 +349,8 @@ golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220908164124-27713097b956/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.5.0 h1:MUK/U/4lj1t1oPg0HfuXDN/Z1wv31ZJ/YcPiGccS4DU=
-golang.org/x/sys v0.5.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
+golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
@@ -358,8 +358,8 @@ golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
 golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
 golang.org/x/text v0.3.4/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
-golang.org/x/text v0.7.0 h1:4BRB4x83lYWy72KwLD/qYDuTu7q9PjSagHvijDw7cLo=
-golang.org/x/text v0.7.0/go.mod h1:mrYo+phRRbMaCq/xk9113O4dZlRixOauAjOtrjsXDZ8=
+golang.org/x/text v0.10.0 h1:UpjohKhiEgNc0CSauXmwYftY1+LlaC75SJwh0SgCX58=
+golang.org/x/text v0.10.0/go.mod h1:TvPlkZtksWOMsz7fbANvkp4WM8x/WCo/om8BMLbz+aE=
 golang.org/x/time v0.0.0-20181108054448-85acf8d2951c/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=
 golang.org/x/time v0.0.0-20190308202827-9d24e82272b4/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=
 golang.org/x/time v0.0.0-20191024005414-555d28b269f0/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=
