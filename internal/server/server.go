@@ -7,6 +7,7 @@ import (
 	"time"
 
 	bg "github.com/quibbble/go-boardgame"
+	"github.com/quibbble/go-quibbble/internal/datastore"
 	networking "github.com/quibbble/go-quibbble/internal/networking"
 	"github.com/quibbble/go-quibbble/internal/networking/adapters"
 	"github.com/quibbble/go-quibbble/pkg/http"
@@ -29,15 +30,16 @@ func NewServer(cfg Config, log zerolog.Logger) (*Server, error) {
 		g = append(g, games[game])
 	}
 
-	redisAdapter := adapters.NewRedisAdapter(&cfg.Network.Adapters.RedisAdapter, log)
-	a = append(a, &redisAdapter)
+	redis := datastore.NewRedisClient(&cfg.Datastore.Redis)
+
+	a = append(a, adapters.NewRedisAdapter(redis, log))
 
 	network := networking.NewGameNetwork(networking.GameNetworkOptions{
 		Games:      g,
 		Adapters:   a,
 		GameExpiry: cfg.Network.GameExpiry,
 	}, log)
-	handler := NewHandler(log, render.New(), network)
+	handler := NewHandler(log, render.New(), network, redis)
 	r := NewRouter(cfg.Router, log)
 	r = AddRoutes(r, handler)
 	return &Server{

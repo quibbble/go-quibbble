@@ -11,7 +11,6 @@ Router:
   RequestPerSecLimit: 5
   DisableCors: false
   AllowedOrigins:
-    - "https://*.quibbble.com"
     - "http://127.0.0.1:*"
     - "http://localhost:*"
   AllowedMethods:
@@ -33,10 +32,10 @@ Network:
     - "Stratego"
     - "Tic-Tac-Toe"
     - "Tsuro"
-  Adapters:
-    RedisAdapter:
-      Enabled: false                     # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_ENABLED
-      Host: <REDIS_ADAPTER_HOST>         # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_HOST
-      Password: <REDIS_ADAPTER_PASSWORD> # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_PASSWORD
-      IgnoreGameID: ""                   # QUIBBBLE_NETWORK_ADAPTERS_REDISADAPTER_IGNOREGAMEID
   GameExpiry: "3h"
+
+Datastore:
+  Redis:
+    Enabled: false         
+    Host: <REDIS_HOST>
+    Password: <REDIS_PASSWORD>

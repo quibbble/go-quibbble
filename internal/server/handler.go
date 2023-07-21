@@ -8,8 +8,10 @@ import (
 	"github.com/gorilla/websocket"
 	bg "github.com/quibbble/go-boardgame"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
+	"github.com/quibbble/go-quibbble/internal/datastore"
 	networking "github.com/quibbble/go-quibbble/internal/networking"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/unrolled/render"
 )
 
@@ -17,13 +19,15 @@ type Handler struct {
 	log     zerolog.Logger
 	render  *render.Render
 	network *networking.GameNetwork
+	redis   *datastore.RedisClient
 }
 
-func NewHandler(log zerolog.Logger, render *render.Render, network *networking.GameNetwork) *Handler {
+func NewHandler(log zerolog.Logger, render *render.Render, network *networking.GameNetwork, redis *datastore.RedisClient) *Handler {
 	return &Handler{
 		log:     log,
 		render:  render,
 		network: network,
+		redis:   redis,
 	}
 }
 
@@ -150,7 +154,18 @@ func (h *Handler) GetBGN(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
-	writeJSONResponse(h.render, w, http.StatusOK, h.network.GetStats())
+	statsAllTime, err := h.redis.GetGameStats(h.network.GetGames())
+	if err != nil {
+		log.Error().Caller().Err(err).Msg("failed to retrieve all time game stats")
+		statsAllTime = &datastore.GameStatsAllTime{}
+	}
+	statsCurrent := h.network.GetStats()
+	writeJSONResponse(h.render, w, http.StatusOK, StatsResponse{
+		GamesPlayed:    statsAllTime.GamesPlayed,
+		GamesCompleted: statsAllTime.GamesCompleted,
+		GamesCurrent:   statsCurrent.CurrentGameCount,
+		PlayersCurrent: statsCurrent.CurrentPlayerCount,
+	})
 }
 
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {

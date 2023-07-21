@@ -87,3 +87,11 @@ func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {
 	}
 	return server.game.GetBGN(), nil
 }
+
+func (n *GameNetwork) GetGames() []string {
+	games := make([]string, 0)
+	for game := range n.hubs {
+		games = append(games, game)
+	}
+	return games
+}

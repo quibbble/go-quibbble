@@ -4,7 +4,6 @@ import (
 	"time"
 
 	networking "github.com/quibbble/go-quibbble/internal/networking"
-	"github.com/quibbble/go-quibbble/internal/networking/adapters"
 )
 
 var teams = []string{
@@ -13,12 +12,7 @@ var teams = []string{
 
 type NetworkOptions struct {
 	Games      []string
-	Adapters   Adapters
 	GameExpiry time.Duration
-}
-
-type Adapters struct {
-	RedisAdapter adapters.RedisAdapterConfig
 }
 
 type CreateGameRequest struct {
@@ -30,4 +24,11 @@ type CreateGameRequest struct {
 type LoadGameRequest struct {
 	*networking.NetworkingCreateGameOptions
 	BGN string
+}
+
+type StatsResponse struct {
+	GamesPlayed    map[string]int
+	GamesCompleted map[string]int
+	GamesCurrent   map[string]int
+	PlayersCurrent map[string]int
 }

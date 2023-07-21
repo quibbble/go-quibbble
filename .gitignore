@@ -1,6 +1,7 @@
 .vscode
 .DS_Store
 pkg/.DS_Store
+.env
 
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
