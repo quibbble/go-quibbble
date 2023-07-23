@@ -90,8 +90,8 @@ func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {
 
 func (n *GameNetwork) GetGames() []string {
 	games := make([]string, 0)
-	for game := range n.hubs {
-		games = append(games, game)
+	for _, hub := range n.hubs {
+		games = append(games, hub.builder.Key())
 	}
 	return games
 }
