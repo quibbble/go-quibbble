@@ -2,6 +2,7 @@ package go_boardgame_networking
 
 import (
 	"fmt"
+	"runtime/debug"
 	"time"
 
 	bg "github.com/quibbble/go-boardgame"
@@ -40,6 +41,14 @@ func newGameHub(builder bg.BoardGameWithBGNBuilder, gameExpiry time.Duration, ad
 }
 
 func (h *gameHub) Start() {
+	// catch any panics and close the game out gracefully
+	// prevents the server from crashing due to bugs in a game
+	defer func() {
+		if r := recover(); r != nil {
+			msg := fmt.Sprintf("%v from game key '%s' with stack trace %s", r, h.builder.Key(), string(debug.Stack()))
+			h.log.Error().Caller().Msg(msg)
+		}
+	}()
 	go h.clean()
 	for {
 		select {

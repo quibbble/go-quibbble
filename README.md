@@ -38,7 +38,7 @@ $ docker run -d --name quibbble -p 8080:8080 --init -m 512m --cpus=1 quibbble:${
 curl --request POST 'http://localhost:8080/game/create' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "GameKey": "TicTacToe", // the name of the game
+    "GameKey": "Tic-Tac-Toe", // the name of the game
     "GameID": "example",    // the unique instance id
     "Teams": 2,             // the number of players
     "TurnLength": "60s",    // max time per turn, null for no timer

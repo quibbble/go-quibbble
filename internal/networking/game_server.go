@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -113,7 +114,7 @@ func (s *gameServer) Start(done <-chan bool) {
 	// prevents the server from crashing due to bugs in a game
 	defer func() {
 		if r := recover(); r != nil {
-			msg := fmt.Sprintf("%v from game key '%s' and id '%s'", r, s.options.GameKey, s.options.GameID)
+			msg := fmt.Sprintf("%v from game key '%s' and id '%s' and stack trace %s", r, s.options.GameKey, s.options.GameID, string(debug.Stack()))
 			s.log.Error().Caller().Msg(msg)
 			s.done <- fmt.Errorf(msg)
 		}
