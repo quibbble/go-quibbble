@@ -16,7 +16,7 @@ require (
 	github.com/quibbble/go-connect4 v1.0.2
 	github.com/quibbble/go-indigo v1.0.0
 	github.com/quibbble/go-stratego v1.0.8
-	github.com/quibbble/go-tsuro v1.0.6
+	github.com/quibbble/go-tsuro v1.0.7
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.16.0
 	github.com/unrolled/render v1.6.0

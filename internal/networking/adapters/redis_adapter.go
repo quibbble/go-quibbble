@@ -30,7 +30,7 @@ func (r *RedisAdapter) OnGameStart(initialOptions *networking.CreateGameOptions)
 	}
 	key := fmt.Sprintf(datastore.StatsKeyGamesPlayed, strings.ToLower(initialOptions.NetworkOptions.GameKey))
 	if err := r.client.IncrStat(key); err != nil {
-		r.log.Error().Caller().Err(err).Msgf("failed to incr games played for key %s", key)
+		r.log.Debug().Caller().Err(err).Msgf("failed to incr games played for key %s", key)
 	}
 }
 
@@ -40,6 +40,6 @@ func (r *RedisAdapter) OnGameEnd(snapshot *bg.BoardGameSnapshot, options *networ
 	}
 	key := fmt.Sprintf(datastore.StatsKeyGamesCompleted, strings.ToLower(options.GameKey))
 	if err := r.client.IncrStat(key); err != nil {
-		r.log.Error().Caller().Err(err).Msgf("failed to incr games played for key %s", key)
+		r.log.Debug().Caller().Err(err).Msgf("failed to incr games played for key %s", key)
 	}
 }
