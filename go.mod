@@ -1,6 +1,6 @@
 module github.com/quibbble/go-quibbble
 
-go 1.20
+go 1.21
 
 require (
 	github.com/go-chi/chi v4.1.2+incompatible
@@ -10,13 +10,13 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/quibbble/go-boardgame v1.0.6
-	github.com/quibbble/go-carcassonne v1.0.2
-	github.com/quibbble/go-codenames v1.0.2
-	github.com/quibbble/go-connect4 v1.0.2
-	github.com/quibbble/go-indigo v1.0.0
-	github.com/quibbble/go-stratego v1.0.8
-	github.com/quibbble/go-tsuro v1.0.7
+	github.com/quibbble/go-boardgame v1.0.7
+	github.com/quibbble/go-carcassonne v1.0.3
+	github.com/quibbble/go-codenames v1.0.3
+	github.com/quibbble/go-connect4 v1.0.3
+	github.com/quibbble/go-indigo v1.0.1
+	github.com/quibbble/go-stratego v1.0.9
+	github.com/quibbble/go-tsuro v1.0.8
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.16.0
 	github.com/unrolled/render v1.6.0
