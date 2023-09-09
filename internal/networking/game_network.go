@@ -95,3 +95,15 @@ func (n *GameNetwork) GetGames() []string {
 	}
 	return games
 }
+
+func (n *GameNetwork) GetGame(gameKey, gameID string, team ...string) (interface{}, error) {
+	gameHub, ok := n.hubs[strings.ToLower(gameKey)]
+	if !ok {
+		return nil, fmt.Errorf("game key '%s' does not exist", gameKey)
+	}
+	game, ok := gameHub.games[gameID]
+	if !ok {
+		return nil, fmt.Errorf("game ID '%s' does not exist", gameID)
+	}
+	return game.game.GetSnapshot(team...)
+}

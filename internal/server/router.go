@@ -37,6 +37,7 @@ func AddRoutes(r *chi.Mux, networkHandler *Handler) *chi.Mux {
 		r.Post("/load", negroni.New(negroni.WrapFunc(networkHandler.LoadGame)).ServeHTTP)
 		r.Get("/join", negroni.New(negroni.WrapFunc(networkHandler.JoinGame)).ServeHTTP)
 		r.Get("/bgn", negroni.New(negroni.WrapFunc(networkHandler.GetBGN)).ServeHTTP)
+		r.Get("/snapshot", negroni.New(negroni.WrapFunc(networkHandler.GetSnapshot)).ServeHTTP)
 		r.Get("/stats", negroni.New(negroni.WrapFunc(networkHandler.GetStats)).ServeHTTP)
 	})
 	r.Get("/health", negroni.New(negroni.WrapFunc(networkHandler.Health)).ServeHTTP)

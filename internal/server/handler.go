@@ -141,6 +141,25 @@ func (h *Handler) JoinSecureGame(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) GetSnapshot(w http.ResponseWriter, r *http.Request) {
+	gameKey := r.URL.Query().Get("GameKey")
+	gameID := r.URL.Query().Get("GameID")
+	team := r.URL.Query().Get("Team")
+
+	var snapshot interface{}
+	var err error
+	if team != "" {
+		snapshot, err = h.network.GetGame(gameKey, gameID, team)
+	} else {
+		snapshot, err = h.network.GetGame(gameKey, gameID)
+	}
+	if err != nil {
+		writeJSONResponse(h.render, w, http.StatusNotFound, errorResponse{Message: err.Error()})
+		return
+	}
+	writeJSONResponse(h.render, w, http.StatusOK, snapshot)
+}
+
 func (h *Handler) GetBGN(w http.ResponseWriter, r *http.Request) {
 	gameKey := r.URL.Query().Get("GameKey")
 	gameID := r.URL.Query().Get("GameID")

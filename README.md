@@ -65,6 +65,13 @@ curl --request POST 'http://localhost:8080/game/load' \
 curl 'http://localhost:8080/game/bgn?GameKey=Tic-Tac-Toe&GameID=example'
 ```
 
+### Get Snapshot
+
+```bash
+curl 'http://localhost:8080/game/snapshot?GameKey=Tic-Tac-Toe&GameID=example'
+```
+
+
 ### Health Check
 
 ```bash
