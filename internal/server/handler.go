@@ -146,7 +146,7 @@ func (h *Handler) GetBGN(w http.ResponseWriter, r *http.Request) {
 	gameID := r.URL.Query().Get("GameID")
 	game, err := h.network.GetBGN(gameKey, gameID)
 	if err != nil {
-		writeJSONResponse(h.render, w, http.StatusInternalServerError, errorResponse{Message: err.Error()})
+		writeJSONResponse(h.render, w, http.StatusNotFound, errorResponse{Message: err.Error()})
 		return
 	}
 	w.WriteHeader(http.StatusOK)
