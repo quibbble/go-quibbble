@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"math/rand"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
 	bg "github.com/quibbble/go-boardgame"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
+	"github.com/quibbble/go-quibbble/pkg/logger"
 	"github.com/quibbble/go-quibbble/pkg/timer"
-	"github.com/rs/zerolog"
 )
 
 // Actions that if sent are performed in the server and not sent down to the game level
@@ -26,29 +27,27 @@ const (
 
 // gameServer handles all the processing of messages from players for a single game instance
 type gameServer struct {
-	options   *NetworkingCreateGameOptions
-	create    *bg.BoardGameOptions
-	load      *bgn.Game
-	createdAt time.Time
-	builder   bg.BoardGameWithBGNBuilder
-	game      bg.BoardGameWithBGN
-	timer     *timer.Timer
-	alarm     chan bool
-	players   map[*player]string
-	chat      []*ChatMessage
-	join      chan *player
-	leave     chan *player
-	process   chan *message
-	done      chan error
-	adapters  []NetworkAdapter
-	log       zerolog.Logger
+	options       *NetworkingCreateGameOptions
+	create        *bg.BoardGameOptions
+	load          *bgn.Game
+	initializedAt time.Time
+	createdAt     time.Time
+	updatedAt     time.Time
+	builder       bg.BoardGameWithBGNBuilder
+	game          bg.BoardGameWithBGN
+	playCount     int // number of time a game has been completed on this game server
+	timer         *timer.Timer
+	alarm         chan bool
+	players       map[*player]string
+	chat          []*ChatMessage
+	join          chan *player
+	leave         chan *player
+	process       chan *message
+	done          chan error
+	adapters      []NetworkAdapter
 }
 
-func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, adapters []NetworkAdapter, log zerolog.Logger) (*gameServer, error) {
-	game, err := builder.CreateWithBGN(options.GameOptions)
-	if err != nil {
-		return nil, err
-	}
+func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, adapters []NetworkAdapter) (*gameServer, error) {
 	var clock *timer.Timer
 	alarm := make(chan bool)
 	if options.NetworkOptions.TurnLength != nil {
@@ -58,55 +57,66 @@ func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, a
 	if clock != nil && len(options.NetworkOptions.Players) > 0 {
 		defer clock.Start()
 	}
-	return &gameServer{
-		options:   options.NetworkOptions,
-		create:    options.GameOptions,
-		createdAt: time.Now(),
-		builder:   builder,
-		game:      game,
-		timer:     clock,
-		alarm:     alarm,
-		players:   make(map[*player]string),
-		chat:      make([]*ChatMessage, 0),
-		join:      make(chan *player),
-		leave:     make(chan *player),
-		process:   make(chan *message),
-		done:      make(chan error),
-		adapters:  adapters,
-		log:       log,
-	}, nil
-}
-
-func newServerWithBGN(builder bg.BoardGameWithBGNBuilder, options *LoadGameOptions, adapters []NetworkAdapter) (*gameServer, error) {
-	game, err := builder.Load(options.BGN)
-	if err != nil {
-		return nil, err
+	server := &gameServer{
+		options:       options.NetworkOptions,
+		builder:       builder,
+		timer:         clock,
+		alarm:         alarm,
+		initializedAt: time.Now().UTC(),
+		createdAt:     time.Now().UTC(),
+		updatedAt:     time.Now().UTC(),
+		players:       make(map[*player]string),
+		chat:          make([]*ChatMessage, 0),
+		join:          make(chan *player),
+		leave:         make(chan *player),
+		process:       make(chan *message),
+		done:          make(chan error),
+		adapters:      adapters,
 	}
-	var clock *timer.Timer
-	alarm := make(chan bool)
-	if options.NetworkOptions.TurnLength != nil {
-		clock = timer.NewTimer(time.Duration(*options.NetworkOptions.TurnLength), alarm)
+	if options.GameOptions != nil {
+		game, err := builder.CreateWithBGN(options.GameOptions)
+		if err != nil {
+			return nil, err
+		}
+		server.game = game
+		server.create = options.GameOptions
+	} else if options.BGN != nil {
+		gameOptions := &bg.BoardGameOptions{
+			Teams: strings.Split(options.BGN.Tags[bgn.TeamsTag], ", "),
+			MoreOptions: struct {
+				Variant string
+			}{options.BGN.Tags[bgn.VariantTag]},
+		}
+		game, err := builder.Load(options.BGN)
+		if err != nil {
+			return nil, err
+		}
+		server.game = game
+		server.create = gameOptions
+	} else if options.GameData != nil {
+		g, err := bgn.Parse(options.GameData.BGN)
+		if err != nil {
+			return nil, err
+		}
+		gameOptions := &bg.BoardGameOptions{
+			Teams: strings.Split(g.Tags[bgn.TeamsTag], ", "),
+			MoreOptions: struct {
+				Variant string
+			}{g.Tags[bgn.VariantTag]},
+		}
+		game, err := builder.Load(g)
+		if err != nil {
+			return nil, err
+		}
+		server.game = game
+		server.create = gameOptions
+		server.createdAt = options.GameData.CreatedAt
+		server.updatedAt = options.GameData.UpdatedAt
+		server.playCount = options.GameData.PlayCount
+	} else {
+		return nil, fmt.Errorf("create game options missing required game information")
 	}
-	// playing online against unknown people with timer enabled so start timer right away
-	if clock != nil && len(options.NetworkOptions.Players) > 0 {
-		defer clock.Start()
-	}
-	return &gameServer{
-		options:   options.NetworkOptions,
-		load:      options.BGN,
-		createdAt: time.Now(),
-		builder:   builder,
-		game:      game,
-		timer:     clock,
-		alarm:     alarm,
-		players:   make(map[*player]string),
-		chat:      make([]*ChatMessage, 0),
-		join:      make(chan *player),
-		leave:     make(chan *player),
-		process:   make(chan *message),
-		done:      make(chan error),
-		adapters:  adapters,
-	}, nil
+	return server, nil
 }
 
 func (s *gameServer) Start(done <-chan bool) {
@@ -115,7 +125,7 @@ func (s *gameServer) Start(done <-chan bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg := fmt.Sprintf("%v from game key '%s' and id '%s' and stack trace %s", r, s.options.GameKey, s.options.GameID, string(debug.Stack()))
-			s.log.Error().Caller().Msg(msg)
+			logger.Log.Error().Caller().Msg(msg)
 			s.done <- fmt.Errorf(msg)
 		}
 	}()
@@ -158,6 +168,7 @@ func (s *gameServer) Start(done <-chan bool) {
 				s.sendConnectedMessage(player)
 			}
 		case message := <-s.process:
+			s.updatedAt = time.Now().UTC()
 			oldSnapshot, _ := s.game.GetSnapshot()
 			var action bg.BoardGameAction
 			if err := json.Unmarshal(message.payload, &action); err != nil {
@@ -290,6 +301,7 @@ func (s *gameServer) Start(done <-chan bool) {
 			}
 			snapshot, _ := s.game.GetSnapshot()
 			if len(snapshot.Winners) > 0 {
+				s.playCount++
 				for _, adapter := range s.adapters {
 					adapter.OnGameEnd(snapshot, s.options)
 				}
@@ -309,11 +321,11 @@ func (s *gameServer) Start(done <-chan bool) {
 			snapshot, _ := s.game.GetSnapshot()
 			targets, ok := snapshot.Targets.([]*bg.BoardGameAction)
 			if !ok {
-				s.log.Debug().Msg("cannot do random action as targets are not of type []*bg.BoardGameAction")
+				logger.Log.Debug().Msg("cannot do random action as targets are not of type []*bg.BoardGameAction")
 				continue
 			}
 			if len(targets) == 0 {
-				s.log.Debug().Msg("cannot do random action as no valid targets exist")
+				logger.Log.Debug().Msg("cannot do random action as no valid targets exist")
 				continue
 			}
 			turn := snapshot.Turn
@@ -339,7 +351,7 @@ func (s *gameServer) Start(done <-chan bool) {
 }
 
 func (s *gameServer) Join(options JoinGameOptions) error {
-	player := newPlayer(options, s, s.log)
+	player := newPlayer(options, s)
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	go player.ReadPump(wg)

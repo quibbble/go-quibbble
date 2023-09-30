@@ -36,7 +36,10 @@ Network:
   GameExpiry: "3h"
 
 Datastore:
-  Redis:
-    Enabled: false         
-    Host: <REDIS_HOST>
-    Password: <REDIS_PASSWORD>
+  Cockroach:
+    Enabled: false
+    Host: <COCKROACH_HOST>
+    Username: <COCKROACH_PASSWORD>
+    Password: <COCKROACH_PASSWORD>
+    Database: <COCKROACH_DATABASE>
+    SSLMode: <COCKROACH_SSLMODE>

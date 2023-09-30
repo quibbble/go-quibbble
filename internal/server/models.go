@@ -29,6 +29,6 @@ type LoadGameRequest struct {
 type StatsResponse struct {
 	GamesPlayed    map[string]int
 	GamesCompleted map[string]int
-	GamesCurrent   map[string]int
-	PlayersCurrent map[string]int
+	ActiveGames    map[string]int
+	ActivePlayers  map[string]int
 }

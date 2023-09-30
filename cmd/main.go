@@ -24,9 +24,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	logger.Log = log
 
-	log.Info().Msgf("%s service is starting", service)
-	s, err := server.NewServer(cfg, log)
+	logger.Log.Info().Msgf("%s service is starting with config %+v", service, cfg.Str())
+	s, err := server.NewServer(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -37,8 +38,8 @@ func main() {
 	signal.Notify(stop, syscall.SIGTERM)
 
 	stopped := <-stop
-	log.Info().Msg(fmt.Sprintf("%s signal received", stopped.String()))
+	logger.Log.Info().Msg(fmt.Sprintf("%s signal received", stopped.String()))
 	s.Shutdown(false)
 
-	log.Info().Msgf("%s service has stopped", service)
+	logger.Log.Info().Msgf("%s service has stopped", service)
 }

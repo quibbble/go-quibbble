@@ -6,6 +6,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
+var Log zerolog.Logger
+
 func NewLogger(cfg Config, environment string) (zerolog.Logger, error) {
 	lvl, err := zerolog.ParseLevel(cfg.Level)
 	if err != nil {
