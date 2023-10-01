@@ -114,7 +114,7 @@ func (h *gameHub) clean() {
 					if err := h.gameStore.Store(&datastore.Game{
 						GameKey:   h.builder.Key(),
 						GameID:    gameID,
-						BGN:       server.game.GetBGN().String(),
+						BGN:       server.game.GetBGN(),
 						CreatedAt: server.createdAt,
 						UpdatedAt: server.updatedAt,
 						PlayCount: server.playCount,
@@ -138,7 +138,7 @@ func (h *gameHub) Store(ctx context.Context) error {
 		if err := h.gameStore.Store(&datastore.Game{
 			GameKey:   h.builder.Key(),
 			GameID:    gameID,
-			BGN:       server.game.GetBGN().String(),
+			BGN:       server.game.GetBGN(),
 			CreatedAt: server.createdAt,
 			UpdatedAt: server.updatedAt,
 			PlayCount: server.playCount,

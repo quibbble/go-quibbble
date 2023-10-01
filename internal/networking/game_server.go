@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"runtime/debug"
-	"strings"
+	"strconv"
 	"sync"
 	"time"
 
@@ -28,8 +28,7 @@ const (
 // gameServer handles all the processing of messages from players for a single game instance
 type gameServer struct {
 	options       *NetworkingCreateGameOptions
-	create        *bg.BoardGameOptions
-	load          *bgn.Game
+	create        *CreateGameOptions
 	initializedAt time.Time
 	createdAt     time.Time
 	updatedAt     time.Time
@@ -79,37 +78,21 @@ func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, a
 			return nil, err
 		}
 		server.game = game
-		server.create = options.GameOptions
+		server.create = options
 	} else if options.BGN != nil {
-		gameOptions := &bg.BoardGameOptions{
-			Teams: strings.Split(options.BGN.Tags[bgn.TeamsTag], ", "),
-			MoreOptions: struct {
-				Variant string
-			}{options.BGN.Tags[bgn.VariantTag]},
-		}
 		game, err := builder.Load(options.BGN)
 		if err != nil {
 			return nil, err
 		}
 		server.game = game
-		server.create = gameOptions
+		server.create = options
 	} else if options.GameData != nil {
-		g, err := bgn.Parse(options.GameData.BGN)
-		if err != nil {
-			return nil, err
-		}
-		gameOptions := &bg.BoardGameOptions{
-			Teams: strings.Split(g.Tags[bgn.TeamsTag], ", "),
-			MoreOptions: struct {
-				Variant string
-			}{g.Tags[bgn.VariantTag]},
-		}
-		game, err := builder.Load(g)
+		game, err := builder.Load(options.GameData.BGN)
 		if err != nil {
 			return nil, err
 		}
 		server.game = game
-		server.create = gameOptions
+		server.create = options
 		server.createdAt = options.GameData.CreatedAt
 		server.updatedAt = options.GameData.UpdatedAt
 		server.playCount = options.GameData.PlayCount
@@ -232,16 +215,28 @@ func (s *gameServer) Start(done <-chan bool) {
 					s.timer.Stop()
 				}
 				var game bg.BoardGameWithBGN
-				if s.create != nil {
-					game, _ = s.builder.CreateWithBGN(s.create)
-				} else {
-					game, _ = s.builder.Load(&bgn.Game{
-						Tags:    s.load.Tags,
-						Actions: make([]bgn.Action, 0),
+				var err error
+				if s.create.GameOptions != nil {
+					game, err = s.builder.CreateWithBGN(s.create.GameOptions)
+				} else if s.create.BGN != nil {
+					game, err = s.builder.Load(&bgn.Game{
+						Tags: s.create.BGN.Tags,
 					})
+				} else if s.create.GameData != nil {
+					game, err = s.builder.Load(&bgn.Game{
+						Tags: s.create.GameData.BGN.Tags,
+					})
+				} else {
+					logger.Log.Error().Msg("missing create options in undo")
+				}
+				if err != nil {
+					logger.Log.Error().Err(err).Msg("undo action error")
+					continue
 				}
 				for _, action := range oldSnapshot.Actions[:len(oldSnapshot.Actions)-1] {
-					_ = game.Do(action)
+					if err = game.Do(action); err != nil {
+						logger.Log.Error().Err(err).Msg("failed to do action in undo")
+					}
 				}
 				s.game = game
 				for player := range s.players {
@@ -261,28 +256,45 @@ func (s *gameServer) Start(done <-chan bool) {
 					continue
 				}
 				var details struct {
-					MoreOptions interface{}
+					MoreOptions struct {
+						Seed    int
+						Variant string
+					}
 				}
 				if err := mapstructure.Decode(action.MoreDetails, &details); err != nil {
 					s.sendErrorMessage(message.player, err)
 					continue
 				}
+				if details.MoreOptions.Seed == 0 {
+					details.MoreOptions.Seed = int(time.Now().Unix())
+				}
 				var game bg.BoardGameWithBGN
 				var err error
-				if s.create != nil {
+				if s.create.GameOptions != nil {
 					game, err = s.builder.CreateWithBGN(&bg.BoardGameOptions{
-						Teams:       s.create.Teams,
+						Teams:       s.create.GameOptions.Teams,
 						MoreOptions: details.MoreOptions,
 					})
-					if err != nil {
-						s.sendErrorMessage(message.player, err)
-						continue
-					}
-				} else {
-					game, _ = s.builder.Load(&bgn.Game{
-						Tags:    s.load.Tags,
-						Actions: make([]bgn.Action, 0),
+				} else if s.create.BGN != nil {
+					tags := s.create.BGN.Tags
+					tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
+					tags[bgn.VariantTag] = details.MoreOptions.Variant
+					game, err = s.builder.Load(&bgn.Game{
+						Tags: tags,
 					})
+				} else if s.create.GameData != nil {
+					tags := s.create.GameData.BGN.Tags
+					tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
+					tags[bgn.VariantTag] = details.MoreOptions.Variant
+					game, err = s.builder.Load(&bgn.Game{
+						Tags: tags,
+					})
+				} else {
+					logger.Log.Error().Msg("missing create options in undo")
+				}
+				if err != nil {
+					logger.Log.Error().Err(err).Msg("game reset error")
+					continue
 				}
 				s.game = game
 				for player := range s.players {

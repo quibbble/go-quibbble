@@ -166,7 +166,7 @@ func (h *Handler) GetBGN(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
-	statsStored, err := h.gameStore.GetStats()
+	statsStored, err := h.gameStore.GetStats(h.network.GetGames())
 	if err != nil {
 		log.Error().Caller().Err(err).Msg("failed to retrieve all time game stats")
 		statsStored = &datastore.Stats{}

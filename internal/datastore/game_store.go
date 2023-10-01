@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/quibbble/go-boardgame/pkg/bgn"
 )
 
 var (
@@ -17,7 +19,7 @@ var (
 type Game struct {
 	GameKey   string    `json:"game_key"`
 	GameID    string    `json:"game_id"`
-	BGN       string    `json:"bgn"`
+	BGN       *bgn.Game `json:"bgn"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	PlayCount int       `json:"play_count"` // multiple games could have been played under the same game id
@@ -31,7 +33,7 @@ type Stats struct {
 // GameStore stores games into long term storage
 type GameStore interface {
 	GetGame(gameKey, gameID string) (*Game, error)
-	GetStats() (*Stats, error)
+	GetStats(games []string) (*Stats, error)
 	Store(game *Game) error
 	Close(ctx context.Context) error
 }
