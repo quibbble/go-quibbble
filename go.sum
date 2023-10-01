@@ -179,8 +179,6 @@ github.com/quibbble/go-boardgame v1.0.9 h1:OHoLnLx4FCN7F7AdF7BDWQf96hO/ZOWW1q9tX
 github.com/quibbble/go-boardgame v1.0.9/go.mod h1:h0aK8LrDTadO/t8ZqwQ8IwNdxyd2wkQAkOXusMtiJHk=
 github.com/quibbble/go-carcassonne v1.0.3 h1:2PmYugpbWTRaV2ClbgQTeDDkIIjqvb8D2LKalL7qD1E=
 github.com/quibbble/go-carcassonne v1.0.3/go.mod h1:ipLnQ4sFeGbNm3GpT6o/sR0SSL1v8fP8jHmkKziOks0=
-github.com/quibbble/go-codenames v1.0.3 h1:hNOC0/TE6y6Nz7hMeIUwSdwUpLPMgjauuNMu+WAg76w=
-github.com/quibbble/go-codenames v1.0.3/go.mod h1:bV7xMWCLbWQbK3sjJpB7AKLfgfoK8mANQEXnAa3EDn0=
 github.com/quibbble/go-connect4 v1.0.3 h1:N965B1x0Y3ynSdFvm3K8fDAqjKd8ctE84aaA7afCb5g=
 github.com/quibbble/go-connect4 v1.0.3/go.mod h1:2OpuzTTOXhNgRb9YNv1i/9idB+vufU4JBkjzFRaA0W8=
 github.com/quibbble/go-indigo v1.0.4 h1:EuwQLlI4upuhYBY+NaVZC9oIj5VAsVgZShDaGwvFyd0=

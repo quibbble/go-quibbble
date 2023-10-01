@@ -12,7 +12,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/quibbble/go-boardgame v1.0.9
 	github.com/quibbble/go-carcassonne v1.0.3
-	github.com/quibbble/go-codenames v1.0.3
 	github.com/quibbble/go-connect4 v1.0.3
 	github.com/quibbble/go-indigo v1.0.4
 	github.com/quibbble/go-stratego v1.1.0
