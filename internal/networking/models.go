@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	bg "github.com/quibbble/go-boardgame"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
+	"github.com/quibbble/go-quibbble/internal/datastore"
 	"github.com/quibbble/go-quibbble/pkg/duration"
 )
 
@@ -24,13 +25,11 @@ type GameNetworkOptions struct {
 // CreateGameOptions are the fields necessary for creating a game
 type CreateGameOptions struct {
 	NetworkOptions *NetworkingCreateGameOptions
-	GameOptions    *bg.BoardGameOptions
-}
 
-// LoadGameOptions are fields necessary for loading a game
-type LoadGameOptions struct {
-	NetworkOptions *NetworkingCreateGameOptions
-	BGN            *bgn.Game
+	// One of the following is required in order to create a game
+	GameOptions *bg.BoardGameOptions
+	BGN         *bgn.Game
+	GameData    *datastore.Game
 }
 
 // NetworkingCreateGameOptions are the networking options used to create a game

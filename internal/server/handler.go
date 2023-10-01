@@ -3,31 +3,27 @@ package server
 import (
 	"net/http"
 	"strings"
-	"text/scanner"
 
 	"github.com/gorilla/websocket"
 	bg "github.com/quibbble/go-boardgame"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
 	"github.com/quibbble/go-quibbble/internal/datastore"
 	networking "github.com/quibbble/go-quibbble/internal/networking"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/unrolled/render"
 )
 
 type Handler struct {
-	log     zerolog.Logger
-	render  *render.Render
-	network *networking.GameNetwork
-	redis   *datastore.RedisClient
+	render    *render.Render
+	network   *networking.GameNetwork
+	gameStore datastore.GameStore
 }
 
-func NewHandler(log zerolog.Logger, render *render.Render, network *networking.GameNetwork, redis *datastore.RedisClient) *Handler {
+func NewHandler(render *render.Render, network *networking.GameNetwork, gameStore datastore.GameStore) *Handler {
 	return &Handler{
-		log:     log,
-		render:  render,
-		network: network,
-		redis:   redis,
+		render:    render,
+		network:   network,
+		gameStore: gameStore,
 	}
 }
 
@@ -64,10 +60,7 @@ func (h *Handler) LoadGame(w http.ResponseWriter, r *http.Request) {
 		writeJSONResponse(h.render, w, http.StatusBadRequest, errorResponse{Message: err.Error()})
 		return
 	}
-	reader := strings.NewReader(load.BGN)
-	sc := scanner.Scanner{}
-	sc.Init(reader)
-	game, err := bgn.Parse(&sc)
+	game, err := bgn.Parse(load.BGN)
 	if err != nil {
 		writeJSONResponse(h.render, w, http.StatusBadRequest, errorResponse{Message: err.Error()})
 		return
@@ -85,7 +78,7 @@ func (h *Handler) LoadGame(w http.ResponseWriter, r *http.Request) {
 		t = append(t, teams[i])
 	}
 	game.Tags["Teams"] = strings.Join(t, ", ")
-	if err := h.network.LoadGame(networking.LoadGameOptions{
+	if err := h.network.CreateGame(networking.CreateGameOptions{
 		NetworkOptions: load.NetworkingCreateGameOptions,
 		BGN:            game,
 	}); err != nil {
@@ -173,17 +166,17 @@ func (h *Handler) GetBGN(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
-	statsAllTime, err := h.redis.GetGameStats(h.network.GetGames())
+	statsStored, err := h.gameStore.GetStats(h.network.GetGames())
 	if err != nil {
 		log.Error().Caller().Err(err).Msg("failed to retrieve all time game stats")
-		statsAllTime = &datastore.GameStatsAllTime{}
+		statsStored = &datastore.Stats{}
 	}
 	statsCurrent := h.network.GetStats()
 	writeJSONResponse(h.render, w, http.StatusOK, StatsResponse{
-		GamesPlayed:    statsAllTime.GamesPlayed,
-		GamesCompleted: statsAllTime.GamesCompleted,
-		GamesCurrent:   statsCurrent.CurrentGameCount,
-		PlayersCurrent: statsCurrent.CurrentPlayerCount,
+		GamesPlayed:    statsStored.GamesPlayed,
+		GamesCompleted: statsStored.GamesCompleted,
+		ActiveGames:    statsCurrent.ActiveGames,
+		ActivePlayers:  statsCurrent.ActivePlayers,
 	})
 }
 

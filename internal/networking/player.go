@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/rs/zerolog"
+	"github.com/quibbble/go-quibbble/pkg/logger"
 )
 
 const (
@@ -27,17 +27,15 @@ type player struct {
 	server     *gameServer
 	conn       *websocket.Conn
 	send       chan []byte
-	log        zerolog.Logger
 }
 
-func newPlayer(join JoinGameOptions, server *gameServer, log zerolog.Logger) *player {
+func newPlayer(join JoinGameOptions, server *gameServer) *player {
 	return &player{
 		playerID:   join.PlayerID,
 		playerName: join.PlayerName,
 		server:     server,
 		conn:       join.Conn,
 		send:       make(chan []byte, 2),
-		log:        log,
 	}
 }
 
@@ -56,7 +54,7 @@ func (p *player) ReadPump(wg *sync.WaitGroup) {
 		_, msg, err := p.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				p.log.Debug().Err(err).Msg("websocket unexpected close error")
+				logger.Log.Debug().Err(err).Msg("websocket unexpected close error")
 			}
 			break
 		}
