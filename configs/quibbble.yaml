@@ -27,7 +27,6 @@ Server:
 Network:
   Games:
     - "Carcassonne"
-    - "Codenames"
     - "Connect4"
     - "Indigo"
     - "Stratego"
