@@ -91,7 +91,7 @@ func (c *CockroachClient) GetStats(games []string) (*Stats, error) {
 	}
 
 	sql := `
-		SELECT game_key, COUNT(game_id) AS games_played, SUM(play_count) AS games_completed FROM quibbble.games
+		SELECT game_key, COUNT(game_id) AS games_created, SUM(play_count) AS games_played FROM quibbble.games
 		GROUP BY game_key
 	`
 
@@ -105,30 +105,30 @@ func (c *CockroachClient) GetStats(games []string) (*Stats, error) {
 	}
 
 	stats := &Stats{
-		GamesPlayed:    make(map[string]int),
-		GamesCompleted: make(map[string]int),
+		GamesCreated: make(map[string]int),
+		GamesPlayed:  make(map[string]int),
 	}
 
 	for _, game := range games {
+		stats.GamesCreated[game] = 0
 		stats.GamesPlayed[game] = 0
-		stats.GamesCompleted[game] = 0
 	}
 
 	var (
-		gameKey                     string
-		gamesPlayed, gamesCompleted int
+		gameKey                   string
+		gamesCreated, gamesPlayed int
 	)
 
 	for rows.Next() {
-		if err := rows.Scan(&gameKey, &gamesPlayed, &gamesCompleted); err != nil {
+		if err := rows.Scan(&gameKey, &gamesCreated, &gamesPlayed); err != nil {
 			logger.Log.Error().Caller().Err(err).Msg("failed to query cockroach")
 			if err == pgx.ErrNoRows {
 				return nil, ErrGameStoreNotFound
 			}
 			return nil, ErrGameStoreSelect
 		}
+		stats.GamesCreated[gameKey] = gamesCreated
 		stats.GamesPlayed[gameKey] = gamesPlayed
-		stats.GamesCompleted[gameKey] = gamesCompleted
 	}
 
 	return stats, nil

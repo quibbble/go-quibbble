@@ -9,7 +9,7 @@ import (
 	"github.com/quibbble/go-boardgame/pkg/bgn"
 	"github.com/quibbble/go-quibbble/internal/datastore"
 	networking "github.com/quibbble/go-quibbble/internal/networking"
-	"github.com/rs/zerolog/log"
+	"github.com/quibbble/go-quibbble/pkg/logger"
 	"github.com/unrolled/render"
 )
 
@@ -168,15 +168,15 @@ func (h *Handler) GetBGN(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
 	statsStored, err := h.gameStore.GetStats(h.network.GetGames())
 	if err != nil {
-		log.Error().Caller().Err(err).Msg("failed to retrieve all time game stats")
+		logger.Log.Error().Caller().Err(err).Msg("failed to retrieve game stats")
 		statsStored = &datastore.Stats{}
 	}
 	statsCurrent := h.network.GetStats()
 	writeJSONResponse(h.render, w, http.StatusOK, StatsResponse{
-		GamesPlayed:    statsStored.GamesPlayed,
-		GamesCompleted: statsStored.GamesCompleted,
-		ActiveGames:    statsCurrent.ActiveGames,
-		ActivePlayers:  statsCurrent.ActivePlayers,
+		GamesCreated:  statsStored.GamesCreated,
+		GamesPlayed:   statsStored.GamesPlayed,
+		ActiveGames:   statsCurrent.ActiveGames,
+		ActivePlayers: statsCurrent.ActivePlayers,
 	})
 }
 

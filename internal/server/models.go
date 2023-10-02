@@ -27,8 +27,8 @@ type LoadGameRequest struct {
 }
 
 type StatsResponse struct {
-	GamesPlayed    map[string]int
-	GamesCompleted map[string]int
-	ActiveGames    map[string]int
-	ActivePlayers  map[string]int
+	GamesCreated  map[string]int
+	GamesPlayed   map[string]int
+	ActiveGames   map[string]int
+	ActivePlayers map[string]int
 }
