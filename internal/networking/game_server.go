@@ -234,11 +234,16 @@ func (s *gameServer) Start(done <-chan bool) {
 					logger.Log.Error().Err(err).Msg("undo action error")
 					continue
 				}
+				var failed bool
 				for _, action := range oldSnapshot.Actions[:len(oldSnapshot.Actions)-1] {
 					if err = game.Do(action); err != nil {
 						logger.Log.Error().Err(err).Msg("failed to do action in undo")
-						continue
+						failed = true
+						break
 					}
+				}
+				if failed {
+					continue
 				}
 				s.game = game
 				for player := range s.players {
