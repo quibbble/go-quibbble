@@ -228,6 +228,7 @@ func (s *gameServer) Start(done <-chan bool) {
 					})
 				} else {
 					logger.Log.Error().Msg("missing create options in undo")
+					continue
 				}
 				if err != nil {
 					logger.Log.Error().Err(err).Msg("undo action error")
@@ -236,6 +237,7 @@ func (s *gameServer) Start(done <-chan bool) {
 				for _, action := range oldSnapshot.Actions[:len(oldSnapshot.Actions)-1] {
 					if err = game.Do(action); err != nil {
 						logger.Log.Error().Err(err).Msg("failed to do action in undo")
+						continue
 					}
 				}
 				s.game = game
@@ -275,22 +277,22 @@ func (s *gameServer) Start(done <-chan bool) {
 						Teams:       s.create.GameOptions.Teams,
 						MoreOptions: details.MoreOptions,
 					})
+					s.create.GameOptions.MoreOptions = details.MoreOptions
 				} else if s.create.BGN != nil {
 					tags := s.create.BGN.Tags
 					tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
 					tags[bgn.VariantTag] = details.MoreOptions.Variant
-					game, err = s.builder.Load(&bgn.Game{
-						Tags: tags,
-					})
+					game, err = s.builder.Load(&bgn.Game{Tags: tags})
+					s.create.BGN.Tags = tags
 				} else if s.create.GameData != nil {
 					tags := s.create.GameData.BGN.Tags
 					tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
 					tags[bgn.VariantTag] = details.MoreOptions.Variant
-					game, err = s.builder.Load(&bgn.Game{
-						Tags: tags,
-					})
+					game, err = s.builder.Load(&bgn.Game{Tags: tags})
+					s.create.GameData.BGN.Tags = tags
 				} else {
 					logger.Log.Error().Msg("missing create options in undo")
+					continue
 				}
 				if err != nil {
 					logger.Log.Error().Err(err).Msg("game reset error")
@@ -301,32 +303,33 @@ func (s *gameServer) Start(done <-chan bool) {
 					s.sendGameMessage(player)
 				}
 				continue
-			}
-			// try board game action
-			if s.players[message.player] != action.Team {
-				s.sendErrorMessage(message.player, fmt.Errorf("cannot perform game action for another team"))
-				continue
-			}
-			if err := s.game.Do(&action); err != nil {
-				s.sendErrorMessage(message.player, err)
-				continue
-			}
-			snapshot, _ := s.game.GetSnapshot()
-			if len(snapshot.Winners) > 0 {
-				s.playCount++
-				for _, adapter := range s.adapters {
-					adapter.OnGameEnd(snapshot, s.options)
+			default:
+				// board game action
+				if s.players[message.player] != action.Team {
+					s.sendErrorMessage(message.player, fmt.Errorf("cannot perform game action for another team"))
+					continue
 				}
-			}
-			if s.timer != nil {
+				if err := s.game.Do(&action); err != nil {
+					s.sendErrorMessage(message.player, err)
+					continue
+				}
+				snapshot, _ := s.game.GetSnapshot()
 				if len(snapshot.Winners) > 0 {
-					s.timer.Stop()
-				} else if oldSnapshot.Turn != snapshot.Turn {
-					s.timer.Start()
+					s.playCount++
+					for _, adapter := range s.adapters {
+						adapter.OnGameEnd(snapshot, s.options)
+					}
 				}
-			}
-			for player := range s.players {
-				s.sendGameMessage(player)
+				if s.timer != nil {
+					if len(snapshot.Winners) > 0 {
+						s.timer.Stop()
+					} else if oldSnapshot.Turn != snapshot.Turn {
+						s.timer.Start()
+					}
+				}
+				for player := range s.players {
+					s.sendGameMessage(player)
+				}
 			}
 		case <-s.alarm:
 			// do random action(s) for player if time runs out

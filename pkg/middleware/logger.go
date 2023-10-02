@@ -10,20 +10,24 @@ import (
 )
 
 func RequestLogger(log zerolog.Logger) func(h http.Handler) http.Handler {
-	c := alice.New()
-	c = c.Append(hlog.NewHandler(log))
-	c = c.Append(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
-		hlog.FromRequest(r).Info().
-			Str("method", r.Method).
-			Stringer("url", r.URL).
-			Int("status", status).
-			Int("size", size).
-			Dur("duration", duration).
-			Msg("REQ")
-	}))
-	c = c.Append(hlog.RemoteAddrHandler("ip"))
-	c = c.Append(hlog.UserAgentHandler("user_agent"))
-	c = c.Append(hlog.RefererHandler("referer"))
-	c = c.Append(hlog.RequestIDHandler("req_id", "Request-Id"))
-	return c.Then
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/health" {
+				h.ServeHTTP(w, r)
+				return
+			}
+			c := alice.New()
+			c = c.Append(hlog.NewHandler(log))
+			c = c.Append(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
+				hlog.FromRequest(r).Info().
+					Str("method", r.Method).
+					Stringer("url", r.URL).
+					Int("status", status).
+					Msg("REQ")
+			}))
+			c = c.Append(hlog.RemoteAddrHandler("ip"))
+			c = c.Append(hlog.RefererHandler("referer"))
+			c.Then(h).ServeHTTP(w, r)
+		})
+	}
 }

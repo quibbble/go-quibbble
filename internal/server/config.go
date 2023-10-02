@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/quibbble/go-quibbble/internal/datastore"
@@ -18,7 +19,14 @@ type Config struct {
 }
 
 func (c Config) Str() string {
-	c.Datastore.Cockroach.Username = "***"
+	c.Datastore.Cockroach.Host = "***"
 	c.Datastore.Cockroach.Password = "***"
-	return fmt.Sprintf("%+v", c)
+	var str string
+	if c.Environment == "local" {
+		raw, _ := json.MarshalIndent(c, "", "  ")
+		str = string(raw)
+	} else {
+		str = fmt.Sprintf("%+v", c)
+	}
+	return str
 }

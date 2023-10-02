@@ -32,7 +32,7 @@ Network:
     - "Stratego"
     - "Tic-Tac-Toe"
     - "Tsuro"
-  GameExpiry: "3h"
+  GameExpiry: "30m"
 
 Datastore:
   Cockroach:

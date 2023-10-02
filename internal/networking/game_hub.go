@@ -105,7 +105,7 @@ func (h *gameHub) clean() {
 	// every hour check if game is passed gameExpiry in which case it is removed
 	for range time.Tick(time.Minute) {
 		for gameID, server := range h.games {
-			deleteTime := server.initializedAt.Add(h.gameExpiry)
+			deleteTime := server.updatedAt.Add(h.gameExpiry)
 			if time.Now().After(deleteTime) {
 				logger.Log.Debug().Msgf("cleaning '%s' with id '%s'", h.builder.Key(), gameID)
 
