@@ -149,6 +149,9 @@ func (c *CockroachClient) Store(game *Game) error {
 		logger.Log.Error().Caller().Err(err).Msg("failed to exec on cockroach")
 		return ErrGameStoreInsert
 	}
+
+	logger.Log.Debug().Msgf("stored '%s' with id '%s' in game store", game.GameKey, game.GameID)
+
 	return nil
 }
 

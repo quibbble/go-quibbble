@@ -23,7 +23,7 @@ type Server struct {
 }
 
 func NewServer(cfg Config) (*Server, error) {
-	g := make([]bg.BoardGameWithBGNBuilder, 0)
+	g := make([]bg.BoardGameBuilder, 0)
 	a := make([]networking.NetworkAdapter, 0)
 	for _, game := range cfg.Network.Games {
 		g = append(g, games[game])
@@ -38,7 +38,8 @@ func NewServer(cfg Config) (*Server, error) {
 		Games:      g,
 		Adapters:   a,
 		GameExpiry: cfg.Network.GameExpiry,
-	}, gameStore)
+		GameStore:  gameStore,
+	})
 	handler := NewHandler(render.New(), network, gameStore)
 	r := NewRouter(cfg.Router)
 	r = AddRoutes(r, handler)
