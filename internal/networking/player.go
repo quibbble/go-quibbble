@@ -96,3 +96,8 @@ func (p *player) writeMessage(msgType int, payload []byte) error {
 	_ = p.conn.SetWriteDeadline(time.Now().Add(writeWait))
 	return p.conn.WriteMessage(msgType, payload)
 }
+
+func (p *player) Close() error {
+	close(p.send)
+	return p.conn.Close()
+}

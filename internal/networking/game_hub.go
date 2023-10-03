@@ -79,6 +79,7 @@ func (h *gameHub) Start() {
 			}
 			h.done <- server.Join(join)
 		case gameID := <-h.close:
+			h.cleanup[gameID] <- true
 			close(h.cleanup[gameID])
 			delete(h.cleanup, gameID)
 			delete(h.games, gameID)
@@ -109,8 +110,10 @@ func (h *gameHub) clean() {
 	// every hour check if game is passed gameExpiry in which case it is removed
 	for range time.Tick(time.Minute) {
 		for gameID, server := range h.games {
-			deleteTime := server.updatedAt.Add(h.gameExpiry)
-			if time.Now().After(deleteTime) {
+			deleteUpdatedAt := server.updatedAt.Add(h.gameExpiry)
+			deleteIntializedAt := server.initializedAt.Add(h.gameExpiry)
+			now := time.Now().UTC()
+			if now.After(deleteUpdatedAt) && now.After(deleteIntializedAt) {
 				bgnGame, ok := server.game.(bg.BoardGameWithBGN)
 				if !ok {
 					logger.Log.Error().Caller().Err(ErrBGNUnsupported(gameKey))

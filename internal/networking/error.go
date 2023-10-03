@@ -56,4 +56,12 @@ var (
 	ErrNoActionToUndo = fmt.Errorf("no action to undo")
 
 	ErrWrongTeamAction = fmt.Errorf("cannot perform game action for another team")
+
+	ErrInvalidTeam = fmt.Errorf("invalid team")
+
+	ErrAlreadyInTeam = fmt.Errorf("already in team")
+
+	ErrNoOpenTeam = fmt.Errorf("no open team")
+
+	ErrMaxChat = fmt.Errorf("max chat limit reached")
 )

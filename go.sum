@@ -181,8 +181,8 @@ github.com/quibbble/go-carcassonne v1.1.0 h1:Nu0e6hyy0H4QD6gVd4BdfYxAGIJ9EJQQd6s
 github.com/quibbble/go-carcassonne v1.1.0/go.mod h1:ipLnQ4sFeGbNm3GpT6o/sR0SSL1v8fP8jHmkKziOks0=
 github.com/quibbble/go-connect4 v1.0.3 h1:N965B1x0Y3ynSdFvm3K8fDAqjKd8ctE84aaA7afCb5g=
 github.com/quibbble/go-connect4 v1.0.3/go.mod h1:2OpuzTTOXhNgRb9YNv1i/9idB+vufU4JBkjzFRaA0W8=
-github.com/quibbble/go-indigo v1.0.4 h1:EuwQLlI4upuhYBY+NaVZC9oIj5VAsVgZShDaGwvFyd0=
-github.com/quibbble/go-indigo v1.0.4/go.mod h1:maXaFZyYJEw3WHT9naLO10NPce2PjclOWIBE6rbfNNA=
+github.com/quibbble/go-indigo v1.0.5 h1:+A+yEs53npCyg7HtPsr7elZfSF12aCFB73wxi84GJHg=
+github.com/quibbble/go-indigo v1.0.5/go.mod h1:Lp0CVLPOnVQIHxFlsrSJNFpBVIsXna5RhXXZqJIw+Jo=
 github.com/quibbble/go-stratego v1.1.1 h1:hPlwpSwha/YYzSEuNoB2zs6rcahMinow+YyNhAeYxYQ=
 github.com/quibbble/go-stratego v1.1.1/go.mod h1:/bBrVs41uz9yLAMqonkqgPTbtYF/9FTF9e/8yEqAE7k=
 github.com/quibbble/go-tictactoe v1.0.2 h1:sLMNzRUUrNSfc9Ew+7750NCmnpgw07/SlTBkyB1nIQ0=

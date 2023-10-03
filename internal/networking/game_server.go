@@ -18,11 +18,12 @@ import (
 
 // Actions that if sent are performed in the server and not sent down to the game level
 const (
-	ServerActionSetTeam = "SetTeam"
-	ServerActionReset   = "Reset"
-	ServerActionUndo    = "Undo"
-	ServerActionResign  = "Resign"
-	ServerActionChat    = "Chat"
+	ServerActionSetTeam     = "SetTeam"
+	ServerActionSetOpenTeam = "SetOpenTeam"
+	ServerActionReset       = "Reset"
+	ServerActionUndo        = "Undo"
+	ServerActionResign      = "Resign"
+	ServerActionChat        = "Chat"
 )
 
 // gameServer handles all the processing of messages from players for a single game instance
@@ -171,7 +172,7 @@ func (s *gameServer) Start(done <-chan bool) {
 			switch action.ActionType {
 			case ServerActionSetTeam:
 				if len(s.options.Players) > 0 {
-					s.sendErrorMessage(message.player, fmt.Errorf("%s action not allowed", action.ActionType))
+					s.sendErrorMessage(message.player, ErrActionNotAllowed(action.ActionType))
 					continue
 				}
 				var details struct {
@@ -182,7 +183,7 @@ func (s *gameServer) Start(done <-chan bool) {
 					continue
 				}
 				if !contains(oldSnapshot.Teams, details.Team) {
-					s.sendErrorMessage(message.player, fmt.Errorf("invalid team"))
+					s.sendErrorMessage(message.player, ErrInvalidTeam)
 					continue
 				}
 				s.players[message.player] = details.Team
@@ -191,9 +192,37 @@ func (s *gameServer) Start(done <-chan bool) {
 					s.sendConnectedMessage(player)
 				}
 				continue
+			case ServerActionSetOpenTeam:
+				if len(s.options.Players) > 0 {
+					s.sendErrorMessage(message.player, ErrActionNotAllowed(action.ActionType))
+					continue
+				}
+				if s.players[message.player] != "" {
+					s.sendErrorMessage(message.player, ErrAlreadyInTeam)
+					continue
+				}
+				openTeams := append([]string{}, oldSnapshot.Teams...)
+				for _, team := range s.players {
+					for i, other := range openTeams {
+						if other == team {
+							openTeams = append(openTeams[:i], openTeams[i+1:]...)
+							break
+						}
+					}
+				}
+				if len(openTeams) <= 0 {
+					s.sendErrorMessage(message.player, ErrNoOpenTeam)
+					continue
+				}
+				s.players[message.player] = openTeams[0]
+				s.sendGameMessage(message.player)
+				for player := range s.players {
+					s.sendConnectedMessage(player)
+				}
+				continue
 			case ServerActionChat:
 				if len(s.chat) >= 250 {
-					s.sendErrorMessage(message.player, fmt.Errorf("max chat limit reached"))
+					s.sendErrorMessage(message.player, ErrMaxChat)
 					continue
 				}
 				var details struct {
@@ -388,6 +417,11 @@ func (s *gameServer) Start(done <-chan bool) {
 				s.sendGameMessage(player)
 			}
 		case <-done:
+			for player := range s.players {
+				if err := player.Close(); err != nil {
+					logger.Log.Error().Caller().Err(err)
+				}
+			}
 			return
 		}
 	}
