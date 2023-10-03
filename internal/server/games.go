@@ -2,11 +2,11 @@ package server
 
 import (
 	bg "github.com/quibbble/go-boardgame"
-	tictactoe "github.com/quibbble/go-boardgame/examples/tictactoe"
 	carcassonne "github.com/quibbble/go-carcassonne"
 	connect4 "github.com/quibbble/go-connect4"
 	indigo "github.com/quibbble/go-indigo"
 	stratego "github.com/quibbble/go-stratego"
+	tictactoe "github.com/quibbble/go-tictactoe"
 	tsuro "github.com/quibbble/go-tsuro"
 )
 

@@ -8,7 +8,7 @@ import (
 
 func generateName() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	return fmt.Sprintf("%s-%s", adjectives[r.Intn(len(adjectives))], nouns[r.Intn(len(nouns))])
+	return fmt.Sprintf("%s-%s-%d", adjectives[r.Intn(len(adjectives))], nouns[r.Intn(len(nouns))], r.Intn(99))
 }
 
 var adjectives = []string{

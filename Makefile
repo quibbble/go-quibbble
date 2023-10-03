@@ -1,3 +1,8 @@
+include .env
+
 run:
-	export $(grep -v '^#' .env | xargs) > /dev/null
 	go run cmd/main.go
+
+docker:
+	@read -p "enter tag: " tag; \
+	docker build -t quibbble:$$tag -t quibbble:latest -f build/Dockerfile .

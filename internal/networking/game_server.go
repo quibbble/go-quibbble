@@ -32,8 +32,8 @@ type gameServer struct {
 	initializedAt time.Time
 	createdAt     time.Time
 	updatedAt     time.Time
-	builder       bg.BoardGameWithBGNBuilder
-	game          bg.BoardGameWithBGN
+	builder       bg.BoardGameBuilder
+	game          bg.BoardGame
 	playCount     int // number of time a game has been completed on this game server
 	timer         *timer.Timer
 	alarm         chan bool
@@ -46,7 +46,9 @@ type gameServer struct {
 	adapters      []NetworkAdapter
 }
 
-func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, adapters []NetworkAdapter) (*gameServer, error) {
+func newServer(builder bg.BoardGameBuilder, options *CreateGameOptions, adapters []NetworkAdapter) (*gameServer, error) {
+	gameKey, gameID := builder.Key(), options.NetworkOptions.GameID
+
 	var clock *timer.Timer
 	alarm := make(chan bool)
 	if options.NetworkOptions.TurnLength != nil {
@@ -73,36 +75,43 @@ func newServer(builder bg.BoardGameWithBGNBuilder, options *CreateGameOptions, a
 		adapters:      adapters,
 	}
 	if options.GameOptions != nil {
-		game, err := builder.CreateWithBGN(options.GameOptions)
+		game, err := builder.Create(options.GameOptions)
 		if err != nil {
 			return nil, err
 		}
 		server.game = game
 		server.create = options
-	} else if options.BGN != nil {
-		game, err := builder.Load(options.BGN)
-		if err != nil {
-			return nil, err
-		}
-		server.game = game
-		server.create = options
-	} else if options.GameData != nil {
-		game, err := builder.Load(options.GameData.BGN)
-		if err != nil {
-			return nil, err
-		}
-		server.game = game
-		server.create = options
-		server.createdAt = options.GameData.CreatedAt
-		server.updatedAt = options.GameData.UpdatedAt
-		server.playCount = options.GameData.PlayCount
 	} else {
-		return nil, fmt.Errorf("create game options missing required game information")
+		bgnBuilder, ok := builder.(bg.BoardGameWithBGNBuilder)
+		if !ok {
+			return nil, ErrBGNUnsupported(gameKey)
+		}
+		if options.BGN != nil {
+			game, err := bgnBuilder.Load(options.BGN)
+			if err != nil {
+				return nil, err
+			}
+			server.game = game
+			server.create = options
+		} else if options.GameData != nil {
+			game, err := bgnBuilder.Load(options.GameData.BGN)
+			if err != nil {
+				return nil, err
+			}
+			server.game = game
+			server.create = options
+			server.createdAt = options.GameData.CreatedAt
+			server.updatedAt = options.GameData.UpdatedAt
+			server.playCount = options.GameData.PlayCount
+		} else {
+			return nil, ErrCreateGameOptions(gameKey, gameID)
+		}
 	}
 	return server, nil
 }
 
 func (s *gameServer) Start(done <-chan bool) {
+	gameKey, gameID := s.builder.Key(), s.create.NetworkOptions.GameID
 	// catch any panics and close the game out gracefully
 	// prevents the server from crashing due to bugs in a game
 	defer func() {
@@ -117,7 +126,7 @@ func (s *gameServer) Start(done <-chan bool) {
 		select {
 		case player := <-s.join:
 			if _, ok := s.players[player]; ok {
-				s.done <- fmt.Errorf("player already connected")
+				s.done <- ErrPlayerAlreadyConnected(gameKey, gameID)
 				continue
 			}
 			if len(s.options.Players) > 0 {
@@ -130,7 +139,7 @@ func (s *gameServer) Start(done <-chan bool) {
 					}
 				}
 				if !found {
-					s.done <- fmt.Errorf("player may not join")
+					s.done <- ErrPlayerUnauthorized(gameKey, gameID)
 					continue
 				}
 			} else {
@@ -204,31 +213,38 @@ func (s *gameServer) Start(done <-chan bool) {
 				continue
 			case ServerActionUndo:
 				if len(s.options.Players) > 0 {
-					s.sendErrorMessage(message.player, fmt.Errorf("%s action not allowed", action.ActionType))
+					s.sendErrorMessage(message.player, ErrActionNotAllowed(action.ActionType))
 					continue
 				}
 				if len(oldSnapshot.Actions) == 0 {
-					s.sendErrorMessage(message.player, fmt.Errorf("no action to undo"))
+					s.sendErrorMessage(message.player, ErrNoActionToUndo)
 					continue
 				}
 				if s.timer != nil {
 					s.timer.Stop()
 				}
-				var game bg.BoardGameWithBGN
+				var game bg.BoardGame
 				var err error
 				if s.create.GameOptions != nil {
-					game, err = s.builder.CreateWithBGN(s.create.GameOptions)
-				} else if s.create.BGN != nil {
-					game, err = s.builder.Load(&bgn.Game{
-						Tags: s.create.BGN.Tags,
-					})
-				} else if s.create.GameData != nil {
-					game, err = s.builder.Load(&bgn.Game{
-						Tags: s.create.GameData.BGN.Tags,
-					})
+					game, err = s.builder.Create(s.create.GameOptions)
 				} else {
-					logger.Log.Error().Msg("missing create options in undo")
-					continue
+					bgnBuilder, ok := s.builder.(bg.BoardGameWithBGNBuilder)
+					if !ok {
+						logger.Log.Error().Caller().Err(ErrBGNUnsupported(gameKey))
+						continue
+					}
+					if s.create.BGN != nil {
+						game, err = bgnBuilder.Load(&bgn.Game{
+							Tags: s.create.BGN.Tags,
+						})
+					} else if s.create.GameData != nil {
+						game, err = bgnBuilder.Load(&bgn.Game{
+							Tags: s.create.GameData.BGN.Tags,
+						})
+					} else {
+						logger.Log.Error().Msg("missing create options in undo")
+						continue
+					}
 				}
 				if err != nil {
 					logger.Log.Error().Err(err).Msg("undo action error")
@@ -237,7 +253,7 @@ func (s *gameServer) Start(done <-chan bool) {
 				var failed bool
 				for _, action := range oldSnapshot.Actions[:len(oldSnapshot.Actions)-1] {
 					if err = game.Do(action); err != nil {
-						logger.Log.Error().Err(err).Msg("failed to do action in undo")
+						logger.Log.Error().Err(err).Msg("undo action error")
 						failed = true
 						break
 					}
@@ -252,14 +268,14 @@ func (s *gameServer) Start(done <-chan bool) {
 				continue
 			case ServerActionResign:
 				if len(s.options.Players) == 0 {
-					s.sendErrorMessage(message.player, fmt.Errorf("%s action not allowed", action.ActionType))
+					s.sendErrorMessage(message.player, ErrActionNotAllowed(action.ActionType))
 					continue
 				}
 				// todo add resign field to server and do random action for resigned player if it is their turn
 				continue
 			case ServerActionReset:
 				if len(s.options.Players) > 0 {
-					s.sendErrorMessage(message.player, fmt.Errorf("%s action not allowed", action.ActionType))
+					s.sendErrorMessage(message.player, ErrActionNotAllowed(action.ActionType))
 					continue
 				}
 				var details struct {
@@ -275,29 +291,36 @@ func (s *gameServer) Start(done <-chan bool) {
 				if details.MoreOptions.Seed == 0 {
 					details.MoreOptions.Seed = int(time.Now().Unix())
 				}
-				var game bg.BoardGameWithBGN
+				var game bg.BoardGame
 				var err error
 				if s.create.GameOptions != nil {
-					game, err = s.builder.CreateWithBGN(&bg.BoardGameOptions{
+					game, err = s.builder.Create(&bg.BoardGameOptions{
 						Teams:       s.create.GameOptions.Teams,
 						MoreOptions: details.MoreOptions,
 					})
 					s.create.GameOptions.MoreOptions = details.MoreOptions
-				} else if s.create.BGN != nil {
-					tags := s.create.BGN.Tags
-					tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
-					tags[bgn.VariantTag] = details.MoreOptions.Variant
-					game, err = s.builder.Load(&bgn.Game{Tags: tags})
-					s.create.BGN.Tags = tags
-				} else if s.create.GameData != nil {
-					tags := s.create.GameData.BGN.Tags
-					tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
-					tags[bgn.VariantTag] = details.MoreOptions.Variant
-					game, err = s.builder.Load(&bgn.Game{Tags: tags})
-					s.create.GameData.BGN.Tags = tags
 				} else {
-					logger.Log.Error().Msg("missing create options in undo")
-					continue
+					bgnBuilder, ok := s.builder.(bg.BoardGameWithBGNBuilder)
+					if !ok {
+						logger.Log.Error().Caller().Err(ErrBGNUnsupported(gameKey))
+						continue
+					}
+					if s.create.BGN != nil {
+						tags := s.create.BGN.Tags
+						tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
+						tags[bgn.VariantTag] = details.MoreOptions.Variant
+						game, err = bgnBuilder.Load(&bgn.Game{Tags: tags})
+						s.create.BGN.Tags = tags
+					} else if s.create.GameData != nil {
+						tags := s.create.GameData.BGN.Tags
+						tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
+						tags[bgn.VariantTag] = details.MoreOptions.Variant
+						game, err = bgnBuilder.Load(&bgn.Game{Tags: tags})
+						s.create.GameData.BGN.Tags = tags
+					} else {
+						logger.Log.Error().Msg("missing create options in undo")
+						continue
+					}
 				}
 				if err != nil {
 					logger.Log.Error().Err(err).Msg("game reset error")
@@ -311,7 +334,7 @@ func (s *gameServer) Start(done <-chan bool) {
 			default:
 				// board game action
 				if s.players[message.player] != action.Team {
-					s.sendErrorMessage(message.player, fmt.Errorf("cannot perform game action for another team"))
+					s.sendErrorMessage(message.player, ErrWrongTeamAction)
 					continue
 				}
 				if err := s.game.Do(&action); err != nil {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"strings"
@@ -38,7 +37,7 @@ func main() {
 	signal.Notify(stop, syscall.SIGTERM)
 
 	stopped := <-stop
-	logger.Log.Info().Msg(fmt.Sprintf("%s signal received", stopped.String()))
+	logger.Log.Info().Msgf("%s signal received", stopped.String())
 	s.Shutdown(false)
 
 	logger.Log.Info().Msgf("%s service has stopped", service)

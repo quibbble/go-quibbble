@@ -2,9 +2,8 @@ package go_boardgame_networking
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
+	bg "github.com/quibbble/go-boardgame"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
 	"github.com/quibbble/go-quibbble/internal/datastore"
 	"github.com/quibbble/go-quibbble/pkg/logger"
@@ -20,16 +19,16 @@ type GameStats struct {
 	ActivePlayers map[string]int
 }
 
-func NewGameNetwork(options GameNetworkOptions, gameStore datastore.GameStore) *GameNetwork {
+func NewGameNetwork(options GameNetworkOptions) *GameNetwork {
 	hubs := make(map[string]*gameHub)
 	for _, builder := range options.Games {
-		hub := newGameHub(builder, options.GameExpiry, options.Adapters, gameStore)
+		hub := newGameHub(builder, options.GameExpiry, options.Adapters, options.GameStore)
 		go hub.Start()
 		hubs[builder.Key()] = hub
 	}
 	return &GameNetwork{
 		hubs:      hubs,
-		gameStore: gameStore,
+		gameStore: options.GameStore,
 	}
 }
 
@@ -37,10 +36,10 @@ func (n *GameNetwork) CreateGame(options CreateGameOptions) error {
 	gameKey, gameID := options.NetworkOptions.GameKey, options.NetworkOptions.GameID
 	hub, ok := n.hubs[gameKey]
 	if !ok {
-		return fmt.Errorf("game key '%s' does not exist", gameKey)
+		return ErrNoExistingGameKey(gameKey)
 	}
 	if len(options.NetworkOptions.Players) > 0 && len(options.NetworkOptions.Players) != len(options.GameOptions.Teams) {
-		return fmt.Errorf("number of teams are inconsistent")
+		return ErrInconsistentTeams(gameKey, gameID)
 	}
 	if _, ok := hub.games[gameID]; !ok {
 		if gameData, err := n.gameStore.GetGame(gameKey, gameID); err == nil {
@@ -56,12 +55,12 @@ func (n *GameNetwork) JoinGame(options JoinGameOptions) error {
 	gameKey, gameID := options.GameKey, options.GameID
 	hub, ok := n.hubs[gameKey]
 	if !ok {
-		return fmt.Errorf("game key '%s' does not exist", gameKey)
+		return ErrNoExistingGameKey(gameKey)
 	}
 	if _, ok := hub.games[gameID]; !ok {
 		gameData, err := n.gameStore.GetGame(gameKey, gameID)
 		if err != nil {
-			return fmt.Errorf("game id '%s' does not exist", gameID)
+			return ErrNoExistingGameID(gameKey, gameID)
 		}
 		if err := hub.Create(CreateGameOptions{
 			NetworkOptions: &NetworkingCreateGameOptions{
@@ -94,12 +93,15 @@ func (n *GameNetwork) GetStats() *GameStats {
 func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {
 	hub, ok := n.hubs[gameKey]
 	if !ok {
-		return nil, fmt.Errorf("game key '%s' does not exist", gameKey)
+		return nil, ErrNoExistingGameKey(gameKey)
+	}
+	if _, ok := hub.builder.(bg.BoardGameWithBGNBuilder); !ok {
+		return nil, ErrBGNUnsupported(gameKey)
 	}
 	if _, ok := hub.games[gameID]; !ok {
 		gameData, err := n.gameStore.GetGame(gameKey, gameID)
 		if err != nil {
-			return nil, fmt.Errorf("game id '%s' does not exist", gameID)
+			return nil, ErrNoExistingGameID(gameKey, gameID)
 		}
 		if err := hub.Create(CreateGameOptions{
 			NetworkOptions: &NetworkingCreateGameOptions{
@@ -111,7 +113,7 @@ func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {
 			return nil, err
 		}
 	}
-	return hub.games[gameID].game.GetBGN(), nil
+	return hub.games[gameID].game.(bg.BoardGameWithBGN).GetBGN(), nil
 }
 
 func (n *GameNetwork) GetGames() []string {
@@ -125,12 +127,12 @@ func (n *GameNetwork) GetGames() []string {
 func (n *GameNetwork) GetGame(gameKey, gameID string, team ...string) (interface{}, error) {
 	hub, ok := n.hubs[gameKey]
 	if !ok {
-		return nil, fmt.Errorf("game key '%s' does not exist", gameKey)
+		return nil, ErrNoExistingGameKey(gameKey)
 	}
 	if _, ok := hub.games[gameID]; !ok {
 		gameData, err := n.gameStore.GetGame(gameKey, gameID)
 		if err != nil {
-			return nil, fmt.Errorf("game id '%s' does not exist", gameID)
+			return nil, ErrNoExistingGameID(gameKey, gameID)
 		}
 		if err := hub.Create(CreateGameOptions{
 			NetworkOptions: &NetworkingCreateGameOptions{
@@ -146,7 +148,7 @@ func (n *GameNetwork) GetGame(gameKey, gameID string, team ...string) (interface
 }
 
 func (n *GameNetwork) Close(ctx context.Context) error {
-	games := make([]string, 0)
+	gameKeys := make([]string, 0)
 	for gameKey, hub := range n.hubs {
 		errored := false
 		if err := hub.Store(ctx); err != nil {
@@ -158,11 +160,11 @@ func (n *GameNetwork) Close(ctx context.Context) error {
 			errored = true
 		}
 		if errored {
-			games = append(games, gameKey)
+			gameKeys = append(gameKeys, gameKey)
 		}
 	}
-	if len(games) > 0 {
-		return fmt.Errorf("game hubs %s failed to close gracefully", strings.Join(games, ", "))
+	if len(gameKeys) > 0 {
+		return ErrHubClosure(gameKeys...)
 	}
 	return nil
 }

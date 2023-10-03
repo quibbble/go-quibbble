@@ -13,13 +13,16 @@ import (
 // GameNetworkOptions are the options required to create a new network
 type GameNetworkOptions struct {
 	// Games is the list of game builders to add to the networking layer
-	Games []bg.BoardGameWithBGNBuilder
+	Games []bg.BoardGameBuilder
 
 	// Adapters allow for external events to be triggered on game start or end
 	Adapters []NetworkAdapter
 
 	// GameExpiry refers to how long after creation a game will last before being removed
 	GameExpiry time.Duration
+
+	// GameStore stores games longterm
+	GameStore datastore.GameStore
 }
 
 // CreateGameOptions are the fields necessary for creating a game
