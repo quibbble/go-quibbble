@@ -142,11 +142,12 @@ func (h *Handler) GetSnapshot(w http.ResponseWriter, r *http.Request) {
 	var snapshot interface{}
 	var err error
 	if team != "" {
-		snapshot, err = h.network.GetGame(gameKey, gameID, team)
+		snapshot, err = h.network.GetSnapshot(gameKey, gameID, team)
 	} else {
-		snapshot, err = h.network.GetGame(gameKey, gameID)
+		snapshot, err = h.network.GetSnapshot(gameKey, gameID)
 	}
 	if err != nil {
+		logger.Log.Error().Caller().Err(err).Msgf("failed to get game snapshot '%s' for '%s'", gameID, gameKey)
 		writeJSONResponse(h.render, w, http.StatusNotFound, errorResponse{Message: err.Error()})
 		return
 	}

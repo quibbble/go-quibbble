@@ -10,11 +10,11 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/quibbble/go-boardgame v1.1.0
+	github.com/quibbble/go-boardgame v1.1.2
 	github.com/quibbble/go-carcassonne v1.1.0
 	github.com/quibbble/go-connect4 v1.0.3
 	github.com/quibbble/go-indigo v1.0.5
-	github.com/quibbble/go-stratego v1.1.1
+	github.com/quibbble/go-stratego v1.1.2
 	github.com/quibbble/go-tictactoe v1.0.2
 	github.com/quibbble/go-tsuro v1.0.9
 	github.com/rs/zerolog v1.31.0

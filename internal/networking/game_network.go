@@ -124,7 +124,7 @@ func (n *GameNetwork) GetGames() []string {
 	return games
 }
 
-func (n *GameNetwork) GetGame(gameKey, gameID string, team ...string) (interface{}, error) {
+func (n *GameNetwork) GetSnapshot(gameKey, gameID string, team ...string) (interface{}, error) {
 	hub, ok := n.hubs[gameKey]
 	if !ok {
 		return nil, ErrNoExistingGameKey(gameKey)
@@ -132,7 +132,7 @@ func (n *GameNetwork) GetGame(gameKey, gameID string, team ...string) (interface
 	if _, ok := hub.games[gameID]; !ok {
 		gameData, err := n.gameStore.GetGame(gameKey, gameID)
 		if err != nil {
-			return nil, ErrNoExistingGameID(gameKey, gameID)
+			return nil, err
 		}
 		if err := hub.Create(CreateGameOptions{
 			NetworkOptions: &NetworkingCreateGameOptions{
