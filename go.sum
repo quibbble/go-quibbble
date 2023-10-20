@@ -177,8 +177,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/quibbble/go-boardgame v1.1.2 h1:39WGj7mJjtZPTEfysSDkUnq60kRxMR+Q1QfhizS37Hw=
 github.com/quibbble/go-boardgame v1.1.2/go.mod h1:AM2N9X5115/wIi1A9spGlALSTEPRjm5ojtng+pKsAgY=
-github.com/quibbble/go-carcassonne v1.1.0 h1:Nu0e6hyy0H4QD6gVd4BdfYxAGIJ9EJQQd6s8T1n4Tvs=
-github.com/quibbble/go-carcassonne v1.1.0/go.mod h1:ipLnQ4sFeGbNm3GpT6o/sR0SSL1v8fP8jHmkKziOks0=
+github.com/quibbble/go-carcassonne v1.1.1 h1:EVPyGzdTWiJFD3TbXN4brGxWpVHqEmPeEkcg4hnJCDs=
+github.com/quibbble/go-carcassonne v1.1.1/go.mod h1:fxKnzGFaD16HKVJ+jM9sWwLYiDtCmjhOaehDExeb23w=
 github.com/quibbble/go-connect4 v1.0.3 h1:N965B1x0Y3ynSdFvm3K8fDAqjKd8ctE84aaA7afCb5g=
 github.com/quibbble/go-connect4 v1.0.3/go.mod h1:2OpuzTTOXhNgRb9YNv1i/9idB+vufU4JBkjzFRaA0W8=
 github.com/quibbble/go-indigo v1.0.5 h1:+A+yEs53npCyg7HtPsr7elZfSF12aCFB73wxi84GJHg=
