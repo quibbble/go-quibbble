@@ -181,6 +181,11 @@ func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) GetActiveGameIDs(w http.ResponseWriter, r *http.Request) {
+	activeGameIDs := h.network.GetActiveGameIDs()
+	writeJSONResponse(h.render, w, http.StatusOK, activeGameIDs)
+}
+
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(http.StatusText(http.StatusOK)))

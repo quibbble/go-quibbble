@@ -2,7 +2,6 @@ package go_boardgame_networking
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"runtime/debug"
 	"strconv"
@@ -43,7 +42,8 @@ type gameServer struct {
 	join          chan *player
 	leave         chan *player
 	process       chan *message
-	done          chan error
+	errCh         chan error
+	stop          chan interface{}
 	adapters      []NetworkAdapter
 }
 
@@ -72,7 +72,8 @@ func newServer(builder bg.BoardGameBuilder, options *CreateGameOptions, adapters
 		join:          make(chan *player),
 		leave:         make(chan *player),
 		process:       make(chan *message),
-		done:          make(chan error),
+		errCh:         make(chan error),
+		stop:          make(chan interface{}),
 		adapters:      adapters,
 	}
 	if options.GameOptions != nil {
@@ -111,15 +112,14 @@ func newServer(builder bg.BoardGameBuilder, options *CreateGameOptions, adapters
 	return server, nil
 }
 
-func (s *gameServer) Start(done <-chan bool) {
+func (s *gameServer) Start(cleanup chan string) {
 	gameKey, gameID := s.builder.Key(), s.create.NetworkOptions.GameID
 	// catch any panics and close the game out gracefully
 	// prevents the server from crashing due to bugs in a game
 	defer func() {
 		if r := recover(); r != nil {
-			msg := fmt.Sprintf("%v from game key '%s' and id '%s' and stack trace %s", r, s.options.GameKey, s.options.GameID, string(debug.Stack()))
-			logger.Log.Error().Caller().Msg(msg)
-			s.done <- fmt.Errorf(msg)
+			logger.Log.Error().Caller().Msgf("%v from game key '%s' and id '%s' and stack trace %s", r, s.options.GameKey, s.options.GameID, string(debug.Stack()))
+			cleanup <- gameID
 		}
 	}()
 
@@ -127,7 +127,7 @@ func (s *gameServer) Start(done <-chan bool) {
 		select {
 		case player := <-s.join:
 			if _, ok := s.players[player]; ok {
-				s.done <- ErrPlayerAlreadyConnected(gameKey, gameID)
+				s.errCh <- ErrPlayerAlreadyConnected(gameKey, gameID)
 				continue
 			}
 			if len(s.options.Players) > 0 {
@@ -140,7 +140,7 @@ func (s *gameServer) Start(done <-chan bool) {
 					}
 				}
 				if !found {
-					s.done <- ErrPlayerUnauthorized(gameKey, gameID)
+					s.errCh <- ErrPlayerUnauthorized(gameKey, gameID)
 					continue
 				}
 			} else {
@@ -151,7 +151,7 @@ func (s *gameServer) Start(done <-chan bool) {
 			for player := range s.players {
 				s.sendConnectedMessage(player)
 			}
-			s.done <- nil
+			s.errCh <- nil
 		case player := <-s.leave:
 			delete(s.players, player)
 			if !byteChanIsClosed(player.send) {
@@ -416,15 +416,19 @@ func (s *gameServer) Start(done <-chan bool) {
 			for player := range s.players {
 				s.sendGameMessage(player)
 			}
-		case <-done:
-			for player := range s.players {
-				if err := player.Close(); err != nil {
-					logger.Log.Error().Caller().Err(err)
-				}
-			}
+		case <-s.stop:
 			return
 		}
 	}
+}
+
+func (s *gameServer) Close() {
+	for player := range s.players {
+		if err := player.Close(); err != nil {
+			logger.Log.Error().Caller().Err(err)
+		}
+	}
+	s.stop <- true
 }
 
 func (s *gameServer) Join(options JoinGameOptions) error {
@@ -435,7 +439,7 @@ func (s *gameServer) Join(options JoinGameOptions) error {
 	go player.WritePump(wg)
 	wg.Wait()
 	s.join <- player
-	return <-s.done
+	return <-s.errCh
 }
 
 func (s *gameServer) sendGameMessage(player *player) {

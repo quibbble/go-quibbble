@@ -2,6 +2,7 @@ package go_boardgame_networking
 
 import (
 	"context"
+	"sort"
 
 	bg "github.com/quibbble/go-boardgame"
 	"github.com/quibbble/go-boardgame/pkg/bgn"
@@ -81,13 +82,27 @@ func (n *GameNetwork) GetStats() *GameStats {
 		ActivePlayers: make(map[string]int),
 	}
 	for _, hub := range n.hubs {
-		stats.ActiveGames[hub.builder.Key()] = len(hub.games)
-		stats.ActivePlayers[hub.builder.Key()] = 0
+		key := hub.builder.Key()
+		stats.ActiveGames[key] = len(hub.games)
+		stats.ActivePlayers[key] = 0
 		for _, game := range hub.games {
-			stats.ActivePlayers[hub.builder.Key()] += len(game.players)
+			stats.ActivePlayers[key] += len(game.players)
 		}
 	}
 	return stats
+}
+
+func (n *GameNetwork) GetActiveGameIDs() map[string][]string {
+	activeGameIDs := make(map[string][]string)
+	for _, hub := range n.hubs {
+		gameIDs := make([]string, 0)
+		for gameID := range hub.games {
+			gameIDs = append(gameIDs, gameID)
+		}
+		sort.Strings(gameIDs)
+		activeGameIDs[hub.builder.Key()] = gameIDs
+	}
+	return activeGameIDs
 }
 
 func (n *GameNetwork) GetBGN(gameKey, gameID string) (*bgn.Game, error) {

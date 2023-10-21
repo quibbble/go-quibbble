@@ -10,16 +10,17 @@ import (
 	"github.com/quibbble/go-quibbble/pkg/logger"
 )
 
+// TODO add timeout context to prevent gamHub from hanging
+
 // gameHub is a hub for a unique game type i.e. only for connect4 or only for tsuro
 type gameHub struct {
 	gameStore  datastore.GameStore
 	builder    bg.BoardGameBuilder
 	games      map[string]*gameServer // mapping from game ID to game server
-	cleanup    map[string]chan bool   // mapping from game ID to game's done channel that should be closed on game cleanup
 	create     chan CreateGameOptions
 	join       chan JoinGameOptions
-	close      chan string
-	done       chan error
+	cleanup    chan string
+	errCh      chan error
 	gameExpiry time.Duration
 	adapters   []NetworkAdapter
 }
@@ -29,11 +30,10 @@ func newGameHub(builder bg.BoardGameBuilder, gameExpiry time.Duration, adapters 
 		gameStore:  gameStore,
 		builder:    builder,
 		games:      make(map[string]*gameServer),
-		cleanup:    make(map[string]chan bool),
 		create:     make(chan CreateGameOptions),
 		join:       make(chan JoinGameOptions),
-		close:      make(chan string),
-		done:       make(chan error),
+		cleanup:    make(chan string),
+		errCh:      make(chan error),
 		gameExpiry: gameExpiry,
 		adapters:   adapters,
 	}
@@ -57,31 +57,27 @@ func (h *gameHub) Start() {
 			gameID := create.NetworkOptions.GameID
 			_, ok := h.games[gameID]
 			if ok {
-				h.done <- ErrExistingGameID(gameKey, gameID)
+				h.errCh <- ErrExistingGameID(gameKey, gameID)
 				continue
 			}
 			server, err := newServer(h.builder, &create, h.adapters)
 			if err != nil {
 				logger.Log.Error().Err(err).Msgf(ErrCreateGame(gameKey, gameID).Error())
-				h.done <- err
+				h.errCh <- err
 				continue
 			}
-			cleanup := make(chan bool)
-			go server.Start(cleanup)
+			go server.Start(h.cleanup)
 			h.games[gameID] = server
-			h.cleanup[gameID] = cleanup
-			h.done <- nil
+			h.errCh <- nil
 		case join := <-h.join:
 			server, ok := h.games[join.GameID]
 			if !ok {
-				h.done <- ErrNoExistingGameID(gameKey, join.GameID)
+				h.errCh <- ErrNoExistingGameID(gameKey, join.GameID)
 				continue
 			}
-			h.done <- server.Join(join)
-		case gameID := <-h.close:
-			h.cleanup[gameID] <- true
-			close(h.cleanup[gameID])
-			delete(h.cleanup, gameID)
+			h.errCh <- server.Join(join)
+		case gameID := <-h.cleanup:
+			h.games[gameID].Close()
 			delete(h.games, gameID)
 		}
 	}
@@ -89,8 +85,7 @@ func (h *gameHub) Start() {
 
 func (h *gameHub) Create(options CreateGameOptions) error {
 	h.create <- options
-	err := <-h.done
-	if err != nil {
+	if err := <-h.errCh; err != nil {
 		return err
 	}
 	for _, adapter := range h.adapters {
@@ -101,7 +96,7 @@ func (h *gameHub) Create(options CreateGameOptions) error {
 
 func (h *gameHub) Join(options JoinGameOptions) error {
 	h.join <- options
-	return <-h.done
+	return <-h.errCh
 }
 
 func (h *gameHub) clean() {
@@ -130,7 +125,7 @@ func (h *gameHub) clean() {
 					}
 				}
 				logger.Log.Debug().Msgf("cleaning '%s' with id '%s'", h.builder.Key(), gameID)
-				h.close <- gameID
+				h.cleanup <- gameID
 			}
 		}
 	}
@@ -164,7 +159,7 @@ func (h *gameHub) Store(ctx context.Context) error {
 
 func (h *gameHub) Close() error {
 	for gameID := range h.games {
-		h.close <- gameID
+		h.cleanup <- gameID
 	}
 	return nil
 }

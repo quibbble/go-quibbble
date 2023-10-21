@@ -84,6 +84,12 @@ curl 'http://localhost:8080/health'
 curl 'http://localhost:8080/game/stats'
 ```
 
+### Get Games
+
+```bash
+curl 'http://localhost:8080/game/games'
+```
+
 ### Profiling
 
 ```bash
