@@ -27,6 +27,9 @@ type player struct {
 	server     *gameServer
 	conn       *websocket.Conn
 	send       chan []byte
+
+	mu     sync.Mutex
+	closed bool
 }
 
 func newPlayer(join JoinGameOptions, server *gameServer) *player {
@@ -41,10 +44,7 @@ func newPlayer(join JoinGameOptions, server *gameServer) *player {
 
 func (p *player) ReadPump(wg *sync.WaitGroup) {
 	// read message from client
-	defer func() {
-		p.server.leave <- p
-		_ = p.conn.Close()
-	}()
+	defer p.Close()
 	p.conn.SetReadLimit(maxMessageSize)
 	_ = p.conn.SetReadDeadline(time.Now().Add(pongWait))
 	p.conn.SetPongHandler(func(string) error { _ = p.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
@@ -70,7 +70,7 @@ func (p *player) WritePump(wg *sync.WaitGroup) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		_ = p.conn.Close()
+		p.Close()
 	}()
 	// tell outside resource pump started
 	wg.Done()
@@ -98,6 +98,13 @@ func (p *player) writeMessage(msgType int, payload []byte) error {
 }
 
 func (p *player) Close() error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.closed {
+		return nil
+	}
+	p.closed = true
+	p.server.leave <- p
 	close(p.send)
 	return p.conn.Close()
 }
