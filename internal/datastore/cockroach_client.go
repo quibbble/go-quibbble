@@ -61,7 +61,6 @@ func (c *CockroachClient) GetGame(gameKey, gameID string) (*Game, error) {
 	)
 
 	if err := row.Scan(&raw, &createdAt, &updatedAt, &playCount); err != nil {
-		logger.Log.Error().Caller().Err(err).Msg("failed to query cockroach")
 		if err == pgx.ErrNoRows {
 			return nil, ErrGameStoreNotFound
 		}
