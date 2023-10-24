@@ -77,6 +77,7 @@ func (h *gameHub) Start() {
 			}
 			h.errCh <- server.Join(join)
 		case gameID := <-h.cleanup:
+			logger.Log.Debug().Caller().Msgf("cleaning up game with key %s and id %s", gameKey, gameID)
 			h.games[gameID].Close()
 			delete(h.games, gameID)
 		}

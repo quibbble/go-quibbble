@@ -98,11 +98,13 @@ func (p *player) writeMessage(msgType int, payload []byte) error {
 }
 
 func (p *player) Close() error {
+	gameKey, gameID := p.server.builder.Key(), p.server.create.NetworkOptions.GameID
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.closed {
 		return nil
 	}
+	logger.Log.Debug().Caller().Msgf("closing player with key %s and id %s", gameKey, gameID)
 	p.closed = true
 	p.server.leave <- p
 	close(p.send)

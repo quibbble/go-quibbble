@@ -113,19 +113,28 @@ func newServer(builder bg.BoardGameBuilder, options *CreateGameOptions, adapters
 }
 
 func (s *gameServer) Start(cleanup chan string) {
-	gameKey, gameID := s.builder.Key(), s.create.NetworkOptions.GameID
+	gameID := s.create.NetworkOptions.GameID
 	// catch any panics and close the game out gracefully
 	// prevents the server from crashing due to bugs in a game
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Log.Error().Caller().Msgf("%v from game key '%s' and id '%s' and stack trace %s", r, s.options.GameKey, s.options.GameID, string(debug.Stack()))
 			cleanup <- gameID
+			s.loop(true) // restart the server loop to allow for graceful game closure
 		}
 	}()
 
+	s.loop(false)
+}
+
+func (s *gameServer) loop(errored bool) {
+	gameKey, gameID := s.builder.Key(), s.create.NetworkOptions.GameID
 	for {
 		select {
 		case player := <-s.join:
+			if errored {
+				continue
+			}
 			if _, ok := s.players[player]; ok {
 				s.errCh <- ErrPlayerAlreadyConnected(gameKey, gameID)
 				continue
@@ -161,6 +170,9 @@ func (s *gameServer) Start(cleanup chan string) {
 				s.sendConnectedMessage(player)
 			}
 		case message := <-s.process:
+			if errored {
+				continue
+			}
 			s.updatedAt = time.Now().UTC()
 			oldSnapshot, _ := s.game.GetSnapshot()
 			var action bg.BoardGameAction
@@ -389,6 +401,9 @@ func (s *gameServer) Start(cleanup chan string) {
 				}
 			}
 		case <-s.alarm:
+			if errored {
+				continue
+			}
 			// do random action(s) for player if time runs out
 			snapshot, _ := s.game.GetSnapshot()
 			targets, ok := snapshot.Targets.([]*bg.BoardGameAction)
@@ -423,6 +438,8 @@ func (s *gameServer) Start(cleanup chan string) {
 }
 
 func (s *gameServer) Close() {
+	gameKey, gameID := s.builder.Key(), s.create.NetworkOptions.GameID
+	logger.Log.Debug().Caller().Msgf("closing game server with key %s and id %s", gameKey, gameID)
 	for player := range s.players {
 		if err := player.Close(); err != nil {
 			logger.Log.Error().Caller().Err(err)
