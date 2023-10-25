@@ -163,8 +163,8 @@ func (s *gameServer) loop(errored bool) {
 			s.errCh <- nil
 		case player := <-s.leave:
 			delete(s.players, player)
-			if !byteChanIsClosed(player.send) {
-				close(player.send)
+			if err := player.Close(); err != nil {
+				logger.Log.Error().Caller().Err(err).Msg("failed to close player")
 			}
 			for player := range s.players {
 				s.sendConnectedMessage(player)
@@ -474,9 +474,7 @@ func (s *gameServer) sendGameMessage(player *player) {
 	case player.send <- payload:
 	default:
 		delete(s.players, player)
-		if !byteChanIsClosed(player.send) {
-			close(player.send)
-		}
+		player.Close()
 	}
 }
 
@@ -497,9 +495,7 @@ func (s *gameServer) sendNetworkMessage(player *player) {
 	case player.send <- payload:
 	default:
 		delete(s.players, player)
-		if !byteChanIsClosed(player.send) {
-			close(player.send)
-		}
+		player.Close()
 	}
 }
 
@@ -512,9 +508,7 @@ func (s *gameServer) sendChatMessage(player *player) {
 	case player.send <- payload:
 	default:
 		delete(s.players, player)
-		if !byteChanIsClosed(player.send) {
-			close(player.send)
-		}
+		player.Close()
 	}
 }
 
@@ -531,9 +525,7 @@ func (s *gameServer) sendConnectedMessage(player *player) {
 	case player.send <- payload:
 	default:
 		delete(s.players, player)
-		if !byteChanIsClosed(player.send) {
-			close(player.send)
-		}
+		player.Close()
 	}
 }
 
@@ -546,8 +538,6 @@ func (s *gameServer) sendErrorMessage(player *player, err error) {
 	case player.send <- payload:
 	default:
 		delete(s.players, player)
-		if !byteChanIsClosed(player.send) {
-			close(player.send)
-		}
+		player.Close()
 	}
 }

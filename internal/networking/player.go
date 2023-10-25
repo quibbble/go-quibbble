@@ -107,6 +107,8 @@ func (p *player) Close() error {
 	logger.Log.Debug().Caller().Msgf("closing player with key %s and id %s", gameKey, gameID)
 	p.closed = true
 	p.server.leave <- p
-	close(p.send)
+	if !byteChanIsClosed(p.send) {
+		close(p.send)
+	}
 	return p.conn.Close()
 }
