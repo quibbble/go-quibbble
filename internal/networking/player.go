@@ -44,7 +44,7 @@ func newPlayer(join JoinGameOptions, server *gameServer) *player {
 
 func (p *player) ReadPump(wg *sync.WaitGroup) {
 	// read message from client
-	defer p.Close()
+	defer p.close()
 	p.conn.SetReadLimit(maxMessageSize)
 	_ = p.conn.SetReadDeadline(time.Now().Add(pongWait))
 	p.conn.SetPongHandler(func(string) error { _ = p.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
@@ -70,7 +70,7 @@ func (p *player) WritePump(wg *sync.WaitGroup) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		p.Close()
+		p.close()
 	}()
 	// tell outside resource pump started
 	wg.Done()
@@ -97,7 +97,7 @@ func (p *player) writeMessage(msgType int, payload []byte) error {
 	return p.conn.WriteMessage(msgType, payload)
 }
 
-func (p *player) Close() error {
+func (p *player) close() error {
 	gameKey, gameID := p.server.builder.Key(), p.server.create.NetworkOptions.GameID
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -107,6 +107,21 @@ func (p *player) Close() error {
 	logger.Log.Debug().Caller().Msgf("closing player with key %s and id %s", gameKey, gameID)
 	p.closed = true
 	p.server.leave <- p
+	if !byteChanIsClosed(p.send) {
+		close(p.send)
+	}
+	return p.conn.Close()
+}
+
+func (p *player) Close() error {
+	gameKey, gameID := p.server.builder.Key(), p.server.create.NetworkOptions.GameID
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.closed {
+		return nil
+	}
+	logger.Log.Debug().Caller().Msgf("closing player with key %s and id %s", gameKey, gameID)
+	p.closed = true
 	if !byteChanIsClosed(p.send) {
 		close(p.send)
 	}

@@ -163,9 +163,7 @@ func (s *gameServer) loop(errored bool) {
 			s.errCh <- nil
 		case player := <-s.leave:
 			delete(s.players, player)
-			if err := player.Close(); err != nil {
-				logger.Log.Error().Caller().Err(err).Msg("failed to close player")
-			}
+			player.Close()
 			for player := range s.players {
 				s.sendConnectedMessage(player)
 			}
