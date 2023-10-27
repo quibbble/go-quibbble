@@ -13,7 +13,7 @@ require (
 	github.com/quibbble/go-boardgame v1.1.2
 	github.com/quibbble/go-carcassonne v1.1.2
 	github.com/quibbble/go-connect4 v1.0.3
-	github.com/quibbble/go-indigo v1.0.5
+	github.com/quibbble/go-indigo v1.0.6
 	github.com/quibbble/go-stratego v1.1.3
 	github.com/quibbble/go-tictactoe v1.0.2
 	github.com/quibbble/go-tsuro v1.0.9
