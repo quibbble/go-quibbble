@@ -1,25 +1,15 @@
 # Build the binary and run CI
 FROM golang:1.21-alpine3.18 AS builder
 
-RUN apk update && apk upgrade && apk --no-cache add curl
-
-# Intall gcc
-RUN apk add build-base
-
 # Copy local source
 WORKDIR /app
 COPY . .
-
-# Pull dependencies
-RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.31.0
 
 # Build binary
 RUN GOOS=linux go build -a -o quibbble cmd/main.go
 
 # Build image
-FROM alpine:3.18.3
-
-RUN apk update && apk upgrade
+FROM scratch
 
 # Copy config and binary
 WORKDIR /root/
