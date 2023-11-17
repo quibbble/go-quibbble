@@ -11,7 +11,7 @@ require (
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/quibbble/go-boardgame v1.1.2
-	github.com/quibbble/go-carcassonne v1.1.4
+	github.com/quibbble/go-carcassonne v1.1.5
 	github.com/quibbble/go-connect4 v1.0.3
 	github.com/quibbble/go-indigo v1.0.7
 	github.com/quibbble/go-stratego v1.1.4
