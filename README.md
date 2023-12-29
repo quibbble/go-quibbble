@@ -71,6 +71,11 @@ curl 'http://localhost:8080/game/bgn?GameKey=Tic-Tac-Toe&GameID=example'
 curl 'http://localhost:8080/game/snapshot?GameKey=Tic-Tac-Toe&GameID=example'
 ```
 
+### Get Game Info
+
+```bash
+curl 'http://localhost:8080/game/info?GameKey=Tic-Tac-Toe'
+```
 
 ### Health Check
 
