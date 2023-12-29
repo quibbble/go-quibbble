@@ -181,6 +181,15 @@ func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) GetInfo(w http.ResponseWriter, r *http.Request) {
+	gameKey := r.URL.Query().Get("GameKey")
+	info, err := h.network.GetInfo(gameKey)
+	if err != nil {
+		writeJSONResponse(h.render, w, http.StatusBadRequest, errorResponse{Message: err.Error()})
+	}
+	writeJSONResponse(h.render, w, http.StatusOK, info)
+}
+
 func (h *Handler) GetActiveGameIDs(w http.ResponseWriter, r *http.Request) {
 	activeGameIDs := h.network.GetActiveGameIDs()
 	writeJSONResponse(h.render, w, http.StatusOK, activeGameIDs)

@@ -313,31 +313,21 @@ func (s *gameServer) loop(errored bool) {
 				// todo add resign field to server and do random action for resigned player if it is their turn
 				continue
 			case ServerActionReset:
-				if len(s.options.Players) > 0 {
-					s.sendErrorMessage(message.player, ErrActionNotAllowed(action.ActionType))
-					continue
-				}
-				var details struct {
-					MoreOptions struct {
-						Seed    int
-						Variant string
-					}
-				}
-				if err := mapstructure.Decode(action.MoreDetails, &details); err != nil {
-					s.sendErrorMessage(message.player, err)
-					continue
-				}
-				if details.MoreOptions.Seed == 0 {
-					details.MoreOptions.Seed = int(time.Now().Unix())
-				}
+				seed := int(time.Now().Unix())
 				var game bg.BoardGame
 				var err error
 				if s.create.GameOptions != nil {
-					game, err = s.builder.Create(&bg.BoardGameOptions{
-						Teams:       s.create.GameOptions.Teams,
-						MoreOptions: details.MoreOptions,
-					})
-					s.create.GameOptions.MoreOptions = details.MoreOptions
+					options, ok := s.create.GameOptions.MoreOptions.(map[string]interface{})
+					if ok {
+						options[bgn.SeedTag] = seed
+						game, err = s.builder.Create(&bg.BoardGameOptions{
+							Teams:       s.create.GameOptions.Teams,
+							MoreOptions: options,
+						})
+						s.create.GameOptions.MoreOptions = options
+					} else {
+						game, err = s.builder.Create(s.create.GameOptions)
+					}
 				} else {
 					bgnBuilder, ok := s.builder.(bg.BoardGameWithBGNBuilder)
 					if !ok {
@@ -346,14 +336,12 @@ func (s *gameServer) loop(errored bool) {
 					}
 					if s.create.BGN != nil {
 						tags := s.create.BGN.Tags
-						tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
-						tags[bgn.VariantTag] = details.MoreOptions.Variant
+						tags[bgn.SeedTag] = strconv.Itoa(seed)
 						game, err = bgnBuilder.Load(&bgn.Game{Tags: tags})
 						s.create.BGN.Tags = tags
 					} else if s.create.GameData != nil {
 						tags := s.create.GameData.BGN.Tags
-						tags[bgn.SeedTag] = strconv.Itoa(details.MoreOptions.Seed)
-						tags[bgn.VariantTag] = details.MoreOptions.Variant
+						tags[bgn.SeedTag] = strconv.Itoa(seed)
 						game, err = bgnBuilder.Load(&bgn.Game{Tags: tags})
 						s.create.GameData.BGN.Tags = tags
 					} else {

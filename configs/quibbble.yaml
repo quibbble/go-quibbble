@@ -32,6 +32,7 @@ Network:
     - "Stratego"
     - "Tic-Tac-Toe"
     - "Tsuro"
+    - "Quill"
   GameExpiry: "30m"
 
 Datastore:

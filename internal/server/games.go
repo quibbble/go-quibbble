@@ -5,6 +5,7 @@ import (
 	carcassonne "github.com/quibbble/go-carcassonne"
 	connect4 "github.com/quibbble/go-connect4"
 	indigo "github.com/quibbble/go-indigo"
+	quill "github.com/quibbble/go-quill"
 	stratego "github.com/quibbble/go-stratego"
 	tictactoe "github.com/quibbble/go-tictactoe"
 	tsuro "github.com/quibbble/go-tsuro"
@@ -17,6 +18,7 @@ var (
 	strategoBuilder    = stratego.Builder{}
 	tictactoeBuilder   = tictactoe.Builder{}
 	tsuroBuilder       = tsuro.Builder{}
+	quillBuilder       = quill.Builder{}
 )
 
 var games = map[string]bg.BoardGameWithBGNBuilder{
@@ -26,4 +28,5 @@ var games = map[string]bg.BoardGameWithBGNBuilder{
 	strategoBuilder.Key():    &strategoBuilder,
 	tictactoeBuilder.Key():   &tictactoeBuilder,
 	tsuroBuilder.Key():       &tsuroBuilder,
+	quillBuilder.Key():       &quillBuilder,
 }

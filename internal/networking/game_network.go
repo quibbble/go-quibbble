@@ -92,6 +92,14 @@ func (n *GameNetwork) GetStats() *GameStats {
 	return stats
 }
 
+func (n *GameNetwork) GetInfo(gameKey string) (*bg.BoardGameInfo, error) {
+	hub, ok := n.hubs[gameKey]
+	if !ok {
+		return nil, ErrNoExistingGameKey(gameKey)
+	}
+	return hub.builder.Info(), nil
+}
+
 func (n *GameNetwork) GetActiveGameIDs() map[string][]string {
 	activeGameIDs := make(map[string][]string)
 	for _, hub := range n.hubs {

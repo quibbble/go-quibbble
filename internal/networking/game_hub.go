@@ -10,8 +10,6 @@ import (
 	"github.com/quibbble/go-quibbble/pkg/logger"
 )
 
-// TODO add timeout context to prevent gamHub from hanging
-
 // gameHub is a hub for a unique game type i.e. only for connect4 or only for tsuro
 type gameHub struct {
 	gameStore  datastore.GameStore
@@ -50,7 +48,14 @@ func (h *gameHub) Start() {
 		}
 	}()
 
-	go h.clean()
+	// check and clean expired games once a minute
+	cleanExpired := make(chan interface{})
+	go func() {
+		for range time.Tick(time.Minute) {
+			cleanExpired <- true
+		}
+	}()
+
 	for {
 		select {
 		case create := <-h.create:
@@ -80,6 +85,32 @@ func (h *gameHub) Start() {
 			logger.Log.Debug().Caller().Msgf("cleaning up game with key %s and id %s", gameKey, gameID)
 			h.games[gameID].Close()
 			delete(h.games, gameID)
+		case <-cleanExpired:
+			for gameID, server := range h.games {
+				deleteUpdatedAt := server.updatedAt.Add(h.gameExpiry)
+				deleteIntializedAt := server.initializedAt.Add(h.gameExpiry)
+				now := time.Now().UTC()
+				if now.After(deleteUpdatedAt) && now.After(deleteIntializedAt) {
+					bgnGame, ok := server.game.(bg.BoardGameWithBGN)
+					if !ok {
+						logger.Log.Error().Caller().Err(ErrBGNUnsupported(gameKey))
+					} else if len(bgnGame.GetBGN().Actions) > 0 || server.playCount > 0 {
+						if err := h.gameStore.Store(&datastore.Game{
+							GameKey:   gameKey,
+							GameID:    gameID,
+							BGN:       bgnGame.GetBGN(),
+							CreatedAt: server.createdAt,
+							UpdatedAt: server.updatedAt,
+							PlayCount: server.playCount,
+						}); err != nil {
+							logger.Log.Error().Caller().Err(err).Msgf(ErrStoreGame(gameKey, gameID).Error())
+						}
+					}
+					logger.Log.Debug().Caller().Msgf("cleaning up game with key %s and id %s", gameKey, gameID)
+					h.games[gameID].Close()
+					delete(h.games, gameID)
+				}
+			}
 		}
 	}
 }
@@ -98,38 +129,6 @@ func (h *gameHub) Create(options CreateGameOptions) error {
 func (h *gameHub) Join(options JoinGameOptions) error {
 	h.join <- options
 	return <-h.errCh
-}
-
-func (h *gameHub) clean() {
-	gameKey := h.builder.Key()
-
-	// every hour check if game is passed gameExpiry in which case it is removed
-	for range time.Tick(time.Minute) {
-		for gameID, server := range h.games {
-			deleteUpdatedAt := server.updatedAt.Add(h.gameExpiry)
-			deleteIntializedAt := server.initializedAt.Add(h.gameExpiry)
-			now := time.Now().UTC()
-			if now.After(deleteUpdatedAt) && now.After(deleteIntializedAt) {
-				bgnGame, ok := server.game.(bg.BoardGameWithBGN)
-				if !ok {
-					logger.Log.Error().Caller().Err(ErrBGNUnsupported(gameKey))
-				} else if len(bgnGame.GetBGN().Actions) > 0 || server.playCount > 0 {
-					if err := h.gameStore.Store(&datastore.Game{
-						GameKey:   gameKey,
-						GameID:    gameID,
-						BGN:       bgnGame.GetBGN(),
-						CreatedAt: server.createdAt,
-						UpdatedAt: server.updatedAt,
-						PlayCount: server.playCount,
-					}); err != nil {
-						logger.Log.Error().Caller().Err(err).Msgf(ErrStoreGame(gameKey, gameID).Error())
-					}
-				}
-				logger.Log.Debug().Msgf("cleaning '%s' with id '%s'", h.builder.Key(), gameID)
-				h.cleanup <- gameID
-			}
-		}
-	}
 }
 
 func (h *gameHub) Store(ctx context.Context) error {
