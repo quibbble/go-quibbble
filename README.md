@@ -26,8 +26,7 @@ $ ./quibbble
 
 ### Docker
 ```bash
-$ docker build --tag quibbble:${TAG} --platform linux/amd64 -f build/Dockerfile .
-$ docker run -d --name quibbble -p 8080:8080 --init -m 512m --cpus=1 quibbble:${TAG}
+docker compose up
 ```
 
 ## REST API

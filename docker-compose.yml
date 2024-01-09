@@ -1,0 +1,14 @@
+name: go-quibbble
+services:
+    quibbble:
+        build:
+            dockerfile: ./build/Dockerfile
+        container_name: quibbble
+        ports:
+            - 8080:8080
+        init: true
+        deploy:
+            resources:
+                limits:
+                    memory: 512m
+                    cpus: "1"
